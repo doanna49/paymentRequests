@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sc_cat_item_producer">
+    <sc_cat_item_producer action="DELETE">
+        <access_type>restricted</access_type>
+        <active>false</active>
+        <allow_edit>false</allow_edit>
+        <availability>on_desktop</availability>
+        <billable>false</billable>
+        <can_cancel>false</can_cancel>
+        <category display_value="Services">109f0438c6112276003ae8ac13e7009d</category>
+        <checked_out>false</checked_out>
+        <cost>0</cost>
+        <custom_cart/>
+        <delivery_plan display_value="DEFAULT">523da512c611228900811a37c97c2014</delivery_plan>
+        <delivery_plan_script/>
+        <delivery_time>1970-01-03 00:00:00</delivery_time>
+        <description><![CDATA[<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">This form is to request a reimbursement or payment to:</span></p>
+<ul style="margin-bottom: 0in; margin-top: 0px; list-style-position: inside;"><li style="font-size: 9pt;">Students</li><li style="font-size: 9pt;">Non-Paid LTU Staff including Conagoths, Adjunct, Emeritus Professors and Honorary staff</li><li style="font-size: 9pt;">Guests, eg Visiting academics, research participants</li><li style="font-size: 9pt;">Staff: awards and prizes only (area to submit on behalf of staff)</li><li style="font-size: 9pt;">Low value one off payments for non-vendors</li></ul>
+<p style="margin: 0in 0in 0.0001pt 0.5in; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt;"> </span></p>
+<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">Casual, Fixed term &amp; Continuing staff wishing to claim out of pocket expenses, please submit claims through </span><a style="color: #0563c1; text-decoration: underline;" href="https://myapps.microsoft.com/signin/Expensify%20%28PROD%29/1ee1ca76-5bfa-4a38-868b-7fa27639364a?tenantId&#61;9aee26d8-97c2-4fad-8900-96735f6dc73f" rel="nofollow"><span style="font-size: 9.0pt; line-height: 107%;">Expensify</span></a><span style="font-size: 9.0pt; line-height: 107%;">.</span></p>
+<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">For payments to vendors please use the <u><span style="color: #0070c0;">Pay an Invoice form</span></u></span></p>
+<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">Please click <u><span style="color: #0070c0;">here</span></u></span><span class="MsoCommentReference"><span style="font-size: 8.0pt; line-height: 107%;"><a id="_anchor_1" style="color: #0563c1; text-decoration: underline;" href="#_msocom_1" name="_msoanchor_1" rel="nofollow">[TB1]</a> </span></span><span style="font-size: 9.0pt; line-height: 107%;"> to access relevant Knowledge base articles to assist you with this request and your reporting requirements.</span></p>
+<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">If you need to speak to a team member, please call Accounts Payable on 1300 658 824</span></p>
+<div><hr class="msocomoff" />
+<div>
+<div id="_com_1" class="msocomtxt"><a name="_msocom_1"></a>
+<p style="margin: 0in 0in 8pt; font-size: 10pt; font-family: Calibri, sans-serif;"><span class="MsoCommentReference"><span style="font-size: 8.0pt;"> <a style="color: #0563c1; text-decoration: underline;" href="#_msoanchor_1" rel="nofollow">[TB1]</a></span></span><a style="color: #0563c1; text-decoration: underline;" href="https://latrobe.service-now.com/kb?id&#61;kb_search&amp;kb_knowledge_base&#61;bc4847cbdb173b40322e147a3a961950" rel="nofollow">https://latrobe.service-now.com/kb?id&#61;kb_search&amp;kb_knowledge_base&#61;bc4847cbdb173b40322e147a3a961950</a></p>
+<p style="margin: 0in 0in 8pt; font-size: 10pt; font-family: Calibri, sans-serif;"><br /></p>
+</div>
+</div>
+</div>]]></description>
+        <display_price_property>non_zero</display_price_property>
+        <entitlement_script/>
+        <flow_designer_flow/>
+        <group/>
+        <hide_sp>false</hide_sp>
+        <icon/>
+        <ignore_price>true</ignore_price>
+        <image/>
+        <location/>
+        <mandatory_attachment>false</mandatory_attachment>
+        <meta/>
+        <mobile_hide_price>false</mobile_hide_price>
+        <mobile_picture/>
+        <mobile_picture_type>use_desktop_picture</mobile_picture_type>
+        <model/>
+        <name>Create  a Payment Request</name>
+        <no_attachment_v2>false</no_attachment_v2>
+        <no_cart>false</no_cart>
+        <no_cart_v2>false</no_cart_v2>
+        <no_delivery_time_v2>false</no_delivery_time_v2>
+        <no_order>false</no_order>
+        <no_order_now>false</no_order_now>
+        <no_proceed_checkout>false</no_proceed_checkout>
+        <no_quantity>false</no_quantity>
+        <no_quantity_v2>false</no_quantity_v2>
+        <no_search>false</no_search>
+        <no_wishlist_v2>false</no_wishlist_v2>
+        <omit_price>false</omit_price>
+        <order>0</order>
+        <ordered_item_link/>
+        <owner display_value="Doanna Vilson">6816f79cc0a8016401c5a33be04be441</owner>
+        <picture/>
+        <post_insert_script/>
+        <preview>JavaScript: popupOpenStandard("com.glideapp.servicecatalog_cat_item_view.do?v=1&amp;sysparm_id=bd29642407163010e7b1f7208c1ed0e3&amp;sysparm_preview=true", "summary");</preview>
+        <price>0</price>
+        <published_ref display_value="Create  a Payment Request">176b0f2807713010e7b1f7208c1ed0f0</published_ref>
+        <recurring_frequency/>
+        <redirect_url>generated_record</redirect_url>
+        <request_method/>
+        <roles/>
+        <save_options/>
+        <save_script/>
+        <sc_catalogs>e0d08b13c3330100c8b837659bba8fb4</sc_catalogs>
+        <sc_ic_item_staging/>
+        <sc_ic_version/>
+        <sc_template/>
+        <script><![CDATA[var array = {};
+array = JSON.parse(producer.item_details);
+for (var i = 0; i < array.length; i++) {
+    var itemJson = array[i];
+    var gr_lineItem = new GlideRecord('x_661994_paymt_req_line_items');
+    gr_lineItem.initialize();
+    gr_lineItem.purchase_order = current.sys_id;
+    gr_lineItem.reason_for_payment = itemJson.reason_for_payment;
+	gr_lineItem.total_amount = itemJson.total_amount;
+    gr_lineItem.insert();
+
+}]]></script>
+        <short_description>Create Payment Request</short_description>
+        <show_variable_help_on_load>false</show_variable_help_on_load>
+        <start_closed>false</start_closed>
+        <state>draft</state>
+        <sys_class_name>sc_cat_item_producer</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-27 12:09:57</sys_created_on>
+        <sys_id>bd29642407163010e7b1f7208c1ed0e3</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Create  a Payment Request</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sc_cat_item_producer_bd29642407163010e7b1f7208c1ed0e3</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-27 12:09:57</sys_updated_on>
+        <table_name>x_661994_paymt_req_purchase_order</table_name>
+        <template/>
+        <template_manager_roles/>
+        <type>item</type>
+        <u_currency_field>0</u_currency_field>
+        <use_sc_layout>true</use_sc_layout>
+        <vendor/>
+        <view/>
+        <visible_bundle>true</visible_bundle>
+        <visible_guide>true</visible_guide>
+        <visible_standalone>true</visible_standalone>
+        <workflow/>
+    </sc_cat_item_producer>
+    <sys_translated_text action="DELETE" query="documentkey=bd29642407163010e7b1f7208c1ed0e3"/>
+    <fx_price action="DELETE" query="id=bd29642407163010e7b1f7208c1ed0e3"/>
+    <fx_price action="DELETE">
+        <amount>0</amount>
+        <currency display_value="USD">USD</currency>
+        <field>price</field>
+        <id>bd29642407163010e7b1f7208c1ed0e3</id>
+        <parent/>
+        <reference_amount>0</reference_amount>
+        <reference_currency display_value="USD">USD</reference_currency>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-27 12:09:57</sys_created_on>
+        <sys_id>bd29642407163010e7b1f7208c1ed0e6</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-27 12:09:57</sys_updated_on>
+        <table>sc_cat_item_producer</table>
+        <type>calculated</type>
+    </fx_price>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</application>
+        <file_path/>
+        <instance_id>f26d1729db854c90b847ac44d49619b8</instance_id>
+        <instance_name>dev94574</instance_name>
+        <name>sc_cat_item_producer_bd29642407163010e7b1f7208c1ed0e3</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sc_cat_item_producer"&gt;&lt;sc_cat_item_producer action="INSERT_OR_UPDATE"&gt;&lt;access_type&gt;restricted&lt;/access_type&gt;&lt;active&gt;false&lt;/active&gt;&lt;allow_edit&gt;false&lt;/allow_edit&gt;&lt;availability&gt;on_desktop&lt;/availability&gt;&lt;billable&gt;false&lt;/billable&gt;&lt;can_cancel&gt;false&lt;/can_cancel&gt;&lt;category display_value="Services"&gt;109f0438c6112276003ae8ac13e7009d&lt;/category&gt;&lt;checked_out&gt;false&lt;/checked_out&gt;&lt;cost&gt;0&lt;/cost&gt;&lt;custom_cart/&gt;&lt;delivery_plan display_value="DEFAULT"&gt;523da512c611228900811a37c97c2014&lt;/delivery_plan&gt;&lt;delivery_plan_script/&gt;&lt;delivery_time&gt;1970-01-03 00:00:00&lt;/delivery_time&gt;&lt;description&gt;&lt;![CDATA[&lt;p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"&gt;&lt;span style="font-size: 9.0pt; line-height: 107%;"&gt;This form is to request a reimbursement or payment to:&lt;/span&gt;&lt;/p&gt;
+&lt;ul style="margin-bottom: 0in; margin-top: 0px; list-style-position: inside;"&gt;&lt;li style="font-size: 9pt;"&gt;Students&lt;/li&gt;&lt;li style="font-size: 9pt;"&gt;Non-Paid LTU Staff including Conagoths, Adjunct, Emeritus Professors and Honorary staff&lt;/li&gt;&lt;li style="font-size: 9pt;"&gt;Guests, eg Visiting academics, research participants&lt;/li&gt;&lt;li style="font-size: 9pt;"&gt;Staff: awards and prizes only (area to submit on behalf of staff)&lt;/li&gt;&lt;li style="font-size: 9pt;"&gt;Low value one off payments for non-vendors&lt;/li&gt;&lt;/ul&gt;
+&lt;p style="margin: 0in 0in 0.0001pt 0.5in; font-size: 11pt; font-family: Calibri, sans-serif;"&gt;&lt;span style="font-size: 9.0pt;"&gt; &lt;/span&gt;&lt;/p&gt;
+&lt;p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"&gt;&lt;span style="font-size: 9.0pt; line-height: 107%;"&gt;Casual, Fixed term &amp;amp; Continuing staff wishing to claim out of pocket expenses, please submit claims through &lt;/span&gt;&lt;a style="color: #0563c1; text-decoration: underline;" href="https://myapps.microsoft.com/signin/Expensify%20%28PROD%29/1ee1ca76-5bfa-4a38-868b-7fa27639364a?tenantId&amp;#61;9aee26d8-97c2-4fad-8900-96735f6dc73f" rel="nofollow"&gt;&lt;span style="font-size: 9.0pt; line-height: 107%;"&gt;Expensify&lt;/span&gt;&lt;/a&gt;&lt;span style="font-size: 9.0pt; line-height: 107%;"&gt;.&lt;/span&gt;&lt;/p&gt;
+&lt;p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"&gt;&lt;span style="font-size: 9.0pt; line-height: 107%;"&gt;For payments to vendors please use the &lt;u&gt;&lt;span style="color: #0070c0;"&gt;Pay an Invoice form&lt;/span&gt;&lt;/u&gt;&lt;/span&gt;&lt;/p&gt;
+&lt;p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"&gt;&lt;span style="font-size: 9.0pt; line-height: 107%;"&gt;Please click &lt;u&gt;&lt;span style="color: #0070c0;"&gt;here&lt;/span&gt;&lt;/u&gt;&lt;/span&gt;&lt;span class="MsoCommentReference"&gt;&lt;span style="font-size: 8.0pt; line-height: 107%;"&gt;&lt;a id="_anchor_1" style="color: #0563c1; text-decoration: underline;" href="#_msocom_1" name="_msoanchor_1" rel="nofollow"&gt;[TB1]&lt;/a&gt; &lt;/span&gt;&lt;/span&gt;&lt;span style="font-size: 9.0pt; line-height: 107%;"&gt; to access relevant Knowledge base articles to assist you with this request and your reporting requirements.&lt;/span&gt;&lt;/p&gt;
+&lt;p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"&gt;&lt;span style="font-size: 9.0pt; line-height: 107%;"&gt;If you need to speak to a team member, please call Accounts Payable on 1300 658 824&lt;/span&gt;&lt;/p&gt;
+&lt;div&gt;&lt;hr class="msocomoff" /&gt;
+&lt;div&gt;
+&lt;div id="_com_1" class="msocomtxt"&gt;&lt;a name="_msocom_1"&gt;&lt;/a&gt;
+&lt;p style="margin: 0in 0in 8pt; font-size: 10pt; font-family: Calibri, sans-serif;"&gt;&lt;span class="MsoCommentReference"&gt;&lt;span style="font-size: 8.0pt;"&gt; &lt;a style="color: #0563c1; text-decoration: underline;" href="#_msoanchor_1" rel="nofollow"&gt;[TB1]&lt;/a&gt;&lt;/span&gt;&lt;/span&gt;&lt;a style="color: #0563c1; text-decoration: underline;" href="https://latrobe.service-now.com/kb?id&amp;#61;kb_search&amp;amp;kb_knowledge_base&amp;#61;bc4847cbdb173b40322e147a3a961950" rel="nofollow"&gt;https://latrobe.service-now.com/kb?id&amp;#61;kb_search&amp;amp;kb_knowledge_base&amp;#61;bc4847cbdb173b40322e147a3a961950&lt;/a&gt;&lt;/p&gt;
+&lt;p style="margin: 0in 0in 8pt; font-size: 10pt; font-family: Calibri, sans-serif;"&gt;&lt;br /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;]]&gt;&lt;/description&gt;&lt;display_price_property&gt;non_zero&lt;/display_price_property&gt;&lt;entitlement_script/&gt;&lt;flow_designer_flow/&gt;&lt;group/&gt;&lt;hide_sp&gt;false&lt;/hide_sp&gt;&lt;icon/&gt;&lt;ignore_price&gt;true&lt;/ignore_price&gt;&lt;image/&gt;&lt;location/&gt;&lt;mandatory_attachment&gt;false&lt;/mandatory_attachment&gt;&lt;meta/&gt;&lt;mobile_hide_price&gt;false&lt;/mobile_hide_price&gt;&lt;mobile_picture/&gt;&lt;mobile_picture_type&gt;use_desktop_picture&lt;/mobile_picture_type&gt;&lt;model/&gt;&lt;name&gt;Create  a Payment Request&lt;/name&gt;&lt;no_attachment_v2&gt;false&lt;/no_attachment_v2&gt;&lt;no_cart&gt;false&lt;/no_cart&gt;&lt;no_cart_v2&gt;false&lt;/no_cart_v2&gt;&lt;no_delivery_time_v2&gt;false&lt;/no_delivery_time_v2&gt;&lt;no_order&gt;false&lt;/no_order&gt;&lt;no_order_now&gt;false&lt;/no_order_now&gt;&lt;no_proceed_checkout&gt;false&lt;/no_proceed_checkout&gt;&lt;no_quantity&gt;false&lt;/no_quantity&gt;&lt;no_quantity_v2&gt;false&lt;/no_quantity_v2&gt;&lt;no_search&gt;false&lt;/no_search&gt;&lt;no_wishlist_v2&gt;false&lt;/no_wishlist_v2&gt;&lt;omit_price&gt;false&lt;/omit_price&gt;&lt;order&gt;0&lt;/order&gt;&lt;ordered_item_link/&gt;&lt;owner display_value="Doanna Vilson"&gt;6816f79cc0a8016401c5a33be04be441&lt;/owner&gt;&lt;picture/&gt;&lt;post_insert_script/&gt;&lt;preview&gt;JavaScript: popupOpenStandard("com.glideapp.servicecatalog_cat_item_view.do?v=1&amp;amp;sysparm_id=bd29642407163010e7b1f7208c1ed0e3&amp;amp;sysparm_preview=true", "summary");&lt;/preview&gt;&lt;price&gt;0&lt;/price&gt;&lt;published_ref display_value="Create  a Payment Request"&gt;176b0f2807713010e7b1f7208c1ed0f0&lt;/published_ref&gt;&lt;recurring_frequency/&gt;&lt;redirect_url&gt;generated_record&lt;/redirect_url&gt;&lt;request_method/&gt;&lt;roles/&gt;&lt;save_options/&gt;&lt;save_script/&gt;&lt;sc_catalogs&gt;e0d08b13c3330100c8b837659bba8fb4&lt;/sc_catalogs&gt;&lt;sc_ic_item_staging/&gt;&lt;sc_ic_version/&gt;&lt;sc_template/&gt;&lt;script&gt;&lt;![CDATA[var array = {};
+array = JSON.parse(producer.item_details);
+for (var i = 0; i &lt; array.length; i++) {
+    var itemJson = array[i];
+    var gr_lineItem = new GlideRecord('x_661994_paymt_req_line_items');
+    gr_lineItem.initialize();
+    gr_lineItem.purchase_order = current.sys_id;
+    gr_lineItem.reason_for_payment = itemJson.reason_for_payment;
+	gr_lineItem.total_amount = itemJson.total_amount;
+    gr_lineItem.insert();
+
+}]]&gt;&lt;/script&gt;&lt;short_description&gt;Create Payment Request&lt;/short_description&gt;&lt;show_variable_help_on_load&gt;false&lt;/show_variable_help_on_load&gt;&lt;start_closed&gt;false&lt;/start_closed&gt;&lt;state&gt;draft&lt;/state&gt;&lt;sys_class_name&gt;sc_cat_item_producer&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2021-08-27 12:09:57&lt;/sys_created_on&gt;&lt;sys_id&gt;bd29642407163010e7b1f7208c1ed0e3&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_name&gt;Create  a Payment Request&lt;/sys_name&gt;&lt;sys_package display_value="Payment Requests" source="x_661994_paymt_req"&gt;000abe7907913010e7b1f7208c1ed0c2&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Payment Requests"&gt;000abe7907913010e7b1f7208c1ed0c2&lt;/sys_scope&gt;&lt;sys_update_name&gt;sc_cat_item_producer_bd29642407163010e7b1f7208c1ed0e3&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2021-08-27 12:09:57&lt;/sys_updated_on&gt;&lt;table_name&gt;x_661994_paymt_req_purchase_order&lt;/table_name&gt;&lt;template/&gt;&lt;template_manager_roles/&gt;&lt;type&gt;item&lt;/type&gt;&lt;u_currency_field&gt;0&lt;/u_currency_field&gt;&lt;use_sc_layout&gt;true&lt;/use_sc_layout&gt;&lt;vendor/&gt;&lt;view/&gt;&lt;visible_bundle&gt;true&lt;/visible_bundle&gt;&lt;visible_guide&gt;true&lt;/visible_guide&gt;&lt;visible_standalone&gt;true&lt;/visible_standalone&gt;&lt;workflow/&gt;&lt;/sc_cat_item_producer&gt;&lt;sys_translated_text action="delete_multiple" query="documentkey=bd29642407163010e7b1f7208c1ed0e3"/&gt;&lt;fx_price action="delete_multiple" query="id=bd29642407163010e7b1f7208c1ed0e3"/&gt;&lt;fx_price action="INSERT_OR_UPDATE"&gt;&lt;amount&gt;0&lt;/amount&gt;&lt;currency display_value="USD"&gt;USD&lt;/currency&gt;&lt;field&gt;price&lt;/field&gt;&lt;id&gt;bd29642407163010e7b1f7208c1ed0e3&lt;/id&gt;&lt;parent/&gt;&lt;reference_amount&gt;0&lt;/reference_amount&gt;&lt;reference_currency display_value="USD"&gt;USD&lt;/reference_currency&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2021-08-27 12:09:57&lt;/sys_created_on&gt;&lt;sys_id&gt;bd29642407163010e7b1f7208c1ed0e6&lt;/sys_id&gt;&lt;sys_mod_count&gt;0&lt;/sys_mod_count&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2021-08-27 12:09:57&lt;/sys_updated_on&gt;&lt;table&gt;sc_cat_item_producer&lt;/table&gt;&lt;type&gt;calculated&lt;/type&gt;&lt;/fx_price&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>-201585083</payload_hash>
+        <record_name>Create  a Payment Request</record_name>
+        <reverted_from/>
+        <source>36dbfaf907913010e7b1f7208c1ed0d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-27 12:09:57</sys_created_on>
+        <sys_id>7529642407163010e7b1f7208c1ed0ea</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>17b8784433f0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-27 12:09:57</sys_updated_on>
+        <type>Record Producer</type>
+        <update_guid>f9296424be16301003e4ab5f4e8909e9</update_guid>
+        <update_guid_history>f9296424be16301003e4ab5f4e8909e9:-201585083</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Create  a Payment Request">3d67b06007563010e7b1f7208c1ed064</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>system</sys_created_by>
+        <sys_created_on>2021-08-27 13:12:13</sys_created_on>
+        <sys_db_object display_value="" name="sc_cat_item_producer">sc_cat_item_producer</sys_db_object>
+        <sys_id>d171b7dc213e4e38b6230e280b6b0b44</sys_id>
+        <sys_metadata>bd29642407163010e7b1f7208c1ed0e3</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Create  a Payment Request</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_parent display_value="Payment Request">33efd57707213010e7b1f7208c1ed005</sys_parent>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_scope_delete display_value="">7f3b44d21a8a418488cc620bcfd142d9</sys_scope_delete>
+        <sys_update_name>sc_cat_item_producer_bd29642407163010e7b1f7208c1ed0e3</sys_update_name>
+        <sys_update_version display_value="sc_cat_item_producer_bd29642407163010e7b1f7208c1ed0e3">7529642407163010e7b1f7208c1ed0ea</sys_update_version>
+        <sys_updated_by>system</sys_updated_by>
+        <sys_updated_on>2021-08-27 13:12:13</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

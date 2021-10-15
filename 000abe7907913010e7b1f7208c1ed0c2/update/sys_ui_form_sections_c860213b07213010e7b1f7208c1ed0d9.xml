@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_form_sections form_id="c860213b07213010e7b1f7208c1ed0d9" sys_domain="global" table="x_661994_paymt_req_purchase_order" version="3">
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-31 11:44:25</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>5460213b07213010e7b1f7208c1ed0e4</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_661994_paymt_req_purchase_order" name="x_661994_paymt_req_purchase_order" sys_domain="global" view="169009876d2620100acb70b35343302a">c860213b07213010e7b1f7208c1ed0d9</sys_ui_form>
+            <sys_ui_section caption="NULL" display_value="" name="x_661994_paymt_req_purchase_order" sys_domain="global" view="169009876d2620100acb70b35343302a">9860213b07213010e7b1f7208c1ed0dc</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-31 11:44:25</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-31 11:44:25</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>d060213b07213010e7b1f7208c1ed0f1</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_661994_paymt_req_purchase_order" name="x_661994_paymt_req_purchase_order" sys_domain="global" view="169009876d2620100acb70b35343302a">c860213b07213010e7b1f7208c1ed0d9</sys_ui_form>
+            <sys_ui_section caption="Notes" display_value="Notes" name="x_661994_paymt_req_purchase_order" sys_domain="global" view="169009876d2620100acb70b35343302a">9460213b07213010e7b1f7208c1ed0ed</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-31 11:44:25</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-31 11:44:25</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>9060213b07213010e7b1f7208c1ed0ed</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_661994_paymt_req_purchase_order" name="x_661994_paymt_req_purchase_order" sys_domain="global" view="169009876d2620100acb70b35343302a">c860213b07213010e7b1f7208c1ed0d9</sys_ui_form>
+            <sys_ui_section caption="Closure Information" display_value="Closure Information" name="x_661994_paymt_req_purchase_order" sys_domain="global" view="169009876d2620100acb70b35343302a">d060213b07213010e7b1f7208c1ed0e9</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-31 11:44:25</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-31 11:44:25</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>dc60213b07213010e7b1f7208c1ed0e8</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="x_661994_paymt_req_purchase_order" name="x_661994_paymt_req_purchase_order" sys_domain="global" view="169009876d2620100acb70b35343302a">c860213b07213010e7b1f7208c1ed0d9</sys_ui_form>
+            <sys_ui_section caption="Related Records" display_value="Related Records" name="x_661994_paymt_req_purchase_order" sys_domain="global" view="169009876d2620100acb70b35343302a">dc60213b07213010e7b1f7208c1ed0e4</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-31 11:44:25</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form action="INSERT_OR_UPDATE">
+            <name>x_661994_paymt_req_purchase_order</name>
+            <roles/>
+            <sys_class_name>sys_ui_form</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-31 11:44:24</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>c860213b07213010e7b1f7208c1ed0d9</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_661994_paymt_req_purchase_order</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+            <sys_update_name>sys_ui_form_sections_c860213b07213010e7b1f7208c1ed0d9</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-31 11:44:24</sys_updated_on>
+            <sys_user/>
+            <view display_value="Workspace" name="workspace">169009876d2620100acb70b35343302a</view>
+            <view_name/>
+        </sys_ui_form>
+    </sys_ui_form_sections>
+</record_update>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>true</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_661994_paymt_req_line_items</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>PR : Calculate Total</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/ ) {
+
+    /*var gr = new GlideAggregate('x_661994_paymt_req_line_items');
+	gr.addQuery('purchase_order.number' , current.purchase_order.number);  
+	gr.addAggregate('AVG', 'total_amount');      
+    gr.query();
+	while(gr.next())
+{
+    gs.info('DVC get the sum' + gr.getAggregate('AVG', 'total_amount'));
+}*/
+    var sum = 0;
+    var gr = new GlideRecord('x_661994_paymt_req_line_items');
+    gr.addQuery('purchase_order', current.purchase_order);
+    gr.query();
+    while (gr.next()) {
+        sum += gr.total_amount * 1;
+    }
+
+    var purch_gr = new GlideRecord('x_661994_paymt_req_purchase_order');
+    purch_gr.get('sys_id', current.purchase_order);
+    if (purch_gr)
+        purch_gr.total_value_of_order = sum;
+    purch_gr.update();
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-09 03:06:41</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>3808252807a23010e7b1f7208c1ed0eb</sys_id>
+        <sys_mod_count>12</sys_mod_count>
+        <sys_name>PR : Calculate Total</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sys_script_3808252807a23010e7b1f7208c1ed0eb</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-09 03:26:02</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=3808252807a23010e7b1f7208c1ed0eb"/>
+</record_update>

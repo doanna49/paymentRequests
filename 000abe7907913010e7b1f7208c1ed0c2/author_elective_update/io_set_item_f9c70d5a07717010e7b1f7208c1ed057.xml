@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="io_set_item">
+    <io_set_item action="DELETE">
+        <order>200</order>
+        <sc_cat_item display_value="Create Purchase Order">176b0f2807713010e7b1f7208c1ed0f0</sc_cat_item>
+        <sys_class_name>io_set_item</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-08 04:21:44</sys_created_on>
+        <sys_id>f9c70d5a07717010e7b1f7208c1ed057</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>ABN Details.Create Purchase Order</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>io_set_item_f9c70d5a07717010e7b1f7208c1ed057</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-08 04:27:18</sys_updated_on>
+        <variable_set display_value="ABN Details">cfa7891a07717010e7b1f7208c1ed04d</variable_set>
+    </io_set_item>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</application>
+        <file_path/>
+        <instance_id>f26d1729db854c90b847ac44d49619b8</instance_id>
+        <instance_name>dev94574</instance_name>
+        <name>io_set_item_f9c70d5a07717010e7b1f7208c1ed057</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="io_set_item"><io_set_item action="INSERT_OR_UPDATE"><order>200</order><sc_cat_item display_value="Create Purchase Order">176b0f2807713010e7b1f7208c1ed0f0</sc_cat_item><sys_class_name>io_set_item</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2021-08-08 04:21:44</sys_created_on><sys_id>f9c70d5a07717010e7b1f7208c1ed057</sys_id><sys_mod_count>2</sys_mod_count><sys_name>ABN Details.Create Purchase Order</sys_name><sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package><sys_policy/><sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope><sys_update_name>io_set_item_f9c70d5a07717010e7b1f7208c1ed057</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2021-08-08 04:27:18</sys_updated_on><variable_set display_value="ABN Details">cfa7891a07717010e7b1f7208c1ed04d</variable_set></io_set_item></record_update>]]></payload>
+        <payload_hash>883283309</payload_hash>
+        <record_name>ABN Details.Create Purchase Order</record_name>
+        <reverted_from/>
+        <source>36dbfaf907913010e7b1f7208c1ed0d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-08 04:27:18</sys_created_on>
+        <sys_id>e309c9da07717010e7b1f7208c1ed0d7</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>17b2403df9d0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-08 04:27:18</sys_updated_on>
+        <type>Catalog Variable Set</type>
+        <update_guid>6f09c9da2971701028d05d9b5b88acd6</update_guid>
+        <update_guid_history>6f09c9da2971701028d05d9b5b88acd6:883283309,fdc7099aa0717010da3a070e9da3c19b:-858558386</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="ABN Details.Create Purchase Order">8867706007563010e7b1f7208c1ed026</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>system</sys_created_by>
+        <sys_created_on>2021-08-27 13:12:05</sys_created_on>
+        <sys_db_object display_value="" name="io_set_item">io_set_item</sys_db_object>
+        <sys_id>1faba68c2dab4847b8e67ae270494171</sys_id>
+        <sys_metadata>f9c70d5a07717010e7b1f7208c1ed057</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>ABN Details.Create Purchase Order</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_scope_delete display_value="">7f3b44d21a8a418488cc620bcfd142d9</sys_scope_delete>
+        <sys_update_name>io_set_item_f9c70d5a07717010e7b1f7208c1ed057</sys_update_name>
+        <sys_update_version display_value="io_set_item_f9c70d5a07717010e7b1f7208c1ed057">e309c9da07717010e7b1f7208c1ed0d7</sys_update_version>
+        <sys_updated_by>system</sys_updated_by>
+        <sys_updated_on>2021-08-27 13:12:05</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

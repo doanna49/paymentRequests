@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sc_cat_item_producer">
+    <sc_cat_item_producer action="INSERT_OR_UPDATE">
+        <access_type>restricted</access_type>
+        <active>true</active>
+        <allow_edit>false</allow_edit>
+        <availability>on_desktop</availability>
+        <billable>false</billable>
+        <can_cancel>false</can_cancel>
+        <category display_value="Services">109f0438c6112276003ae8ac13e7009d</category>
+        <checked_out>false</checked_out>
+        <cost>0</cost>
+        <custom_cart/>
+        <delivery_plan display_value="DEFAULT">523da512c611228900811a37c97c2014</delivery_plan>
+        <delivery_plan_script/>
+        <delivery_time>1970-01-03 00:00:00</delivery_time>
+        <description><![CDATA[<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">This form is to request a reimbursement or payment to:</span></p>
+<ul style="margin-bottom: 0in; margin-top: 0px; list-style-position: inside;"><li style="font-size: 9pt;">Students</li><li style="font-size: 9pt;">Non-Paid LTU Staff including Conagoths, Adjunct, Emeritus Professors and Honorary staff</li><li style="font-size: 9pt;">Guests, eg Visiting academics, research participants</li><li style="font-size: 9pt;">Staff: awards and prizes only (area to submit on behalf of staff)</li><li style="font-size: 9pt;">Low value one off payments for non-vendors</li></ul>
+<p style="margin: 0in 0in 0.0001pt 0.5in; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt;"> </span></p>
+<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">Casual, Fixed term &amp; Continuing staff wishing to claim out of pocket expenses, please submit claims through </span><a style="color: #0563c1; text-decoration: underline;" href="https://myapps.microsoft.com/signin/Expensify%20%28PROD%29/1ee1ca76-5bfa-4a38-868b-7fa27639364a?tenantId&#61;9aee26d8-97c2-4fad-8900-96735f6dc73f" rel="nofollow"><span style="font-size: 9.0pt; line-height: 107%;">Expensify</span></a><span style="font-size: 9.0pt; line-height: 107%;">.</span></p>
+<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">For payments to vendors please use the <u><span style="color: #0070c0;">Pay an Invoice form</span></u></span></p>
+<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">Please click <u><span style="color: #0070c0;">here</span></u></span><span class="MsoCommentReference"><span style="font-size: 8.0pt; line-height: 107%;"><a id="_anchor_1" style="color: #0563c1; text-decoration: underline;" href="#_msocom_1" name="_msoanchor_1" rel="nofollow">[TB1]</a> </span></span><span style="font-size: 9.0pt; line-height: 107%;"> to access relevant Knowledge base articles to assist you with this request and your reporting requirements.</span></p>
+<p style="margin: 0in 0in 8pt; line-height: 107%; font-size: 11pt; font-family: Calibri, sans-serif;"><span style="font-size: 9.0pt; line-height: 107%;">If you need to speak to a team member, please call Accounts Payable on 1300 658 824</span></p>
+<div> </div>]]></description>
+        <display_price_property>non_zero</display_price_property>
+        <entitlement_script/>
+        <flow_designer_flow/>
+        <group/>
+        <hide_sp>false</hide_sp>
+        <icon/>
+        <ignore_price>true</ignore_price>
+        <image/>
+        <location/>
+        <mandatory_attachment>false</mandatory_attachment>
+        <meta/>
+        <mobile_hide_price>false</mobile_hide_price>
+        <mobile_picture/>
+        <mobile_picture_type>use_desktop_picture</mobile_picture_type>
+        <model/>
+        <name>Create  a Payment Request</name>
+        <no_attachment_v2>false</no_attachment_v2>
+        <no_cart>false</no_cart>
+        <no_cart_v2>false</no_cart_v2>
+        <no_delivery_time_v2>false</no_delivery_time_v2>
+        <no_order>false</no_order>
+        <no_order_now>false</no_order_now>
+        <no_proceed_checkout>false</no_proceed_checkout>
+        <no_quantity>false</no_quantity>
+        <no_quantity_v2>false</no_quantity_v2>
+        <no_search>false</no_search>
+        <no_wishlist_v2>false</no_wishlist_v2>
+        <omit_price>false</omit_price>
+        <order>0</order>
+        <ordered_item_link/>
+        <owner display_value="Doanna Vilson">6816f79cc0a8016401c5a33be04be441</owner>
+        <picture/>
+        <post_insert_script/>
+        <preview>JavaScript: popupOpenStandard("com.glideapp.servicecatalog_cat_item_view.do?v=1&amp;sysparm_id=176b0f2807713010e7b1f7208c1ed0f0&amp;sysparm_preview=true", "summary");</preview>
+        <price>0</price>
+        <published_ref/>
+        <recurring_frequency/>
+        <redirect_url>generated_record</redirect_url>
+        <request_method/>
+        <roles/>
+        <save_options/>
+        <save_script/>
+        <sc_catalogs>e0d08b13c3330100c8b837659bba8fb4</sc_catalogs>
+        <sc_ic_item_staging/>
+        <sc_ic_version/>
+        <sc_template/>
+        <script><![CDATA[var array = {};
+array = JSON.parse(producer.item_details);
+for (var i = 0; i < array.length; i++) {
+    var itemJson = array[i];
+    var gr_lineItem = new GlideRecord('x_661994_paymt_req_line_items');
+    gr_lineItem.initialize();
+    gr_lineItem.purchase_order = current.sys_id;
+    gr_lineItem.reason_for_payment = itemJson.reason_for_payment;
+	gr_lineItem.total_amount = itemJson.total_amount;
+    gr_lineItem.insert();
+
+}]]></script>
+        <short_description>Create Payment Request</short_description>
+        <show_variable_help_on_load>false</show_variable_help_on_load>
+        <start_closed>false</start_closed>
+        <state>published</state>
+        <sys_class_name>sc_cat_item_producer</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-27 12:09:57</sys_created_on>
+        <sys_id>176b0f2807713010e7b1f7208c1ed0f0</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Create  a Payment Request</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sc_cat_item_producer_176b0f2807713010e7b1f7208c1ed0f0</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-10 23:56:02</sys_updated_on>
+        <table_name>x_661994_paymt_req_purchase_order</table_name>
+        <template/>
+        <template_manager_roles/>
+        <type>item</type>
+        <u_currency_field>0</u_currency_field>
+        <use_sc_layout>true</use_sc_layout>
+        <vendor/>
+        <view/>
+        <visible_bundle>true</visible_bundle>
+        <visible_guide>true</visible_guide>
+        <visible_standalone>true</visible_standalone>
+        <workflow/>
+    </sc_cat_item_producer>
+    <sys_translated_text action="delete_multiple" query="documentkey=176b0f2807713010e7b1f7208c1ed0f0"/>
+    <fx_price action="delete_multiple" query="id=176b0f2807713010e7b1f7208c1ed0f0"/>
+    <fx_price action="INSERT_OR_UPDATE">
+        <amount>0</amount>
+        <currency display_value="USD">USD</currency>
+        <field>price</field>
+        <id>176b0f2807713010e7b1f7208c1ed0f0</id>
+        <parent/>
+        <reference_amount>0</reference_amount>
+        <reference_currency display_value="USD">USD</reference_currency>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-03 03:28:13</sys_created_on>
+        <sys_id>d99b036807713010e7b1f7208c1ed0ac</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-03 03:28:13</sys_updated_on>
+        <table>sc_cat_item_producer</table>
+        <type>calculated</type>
+    </fx_price>
+</record_update>

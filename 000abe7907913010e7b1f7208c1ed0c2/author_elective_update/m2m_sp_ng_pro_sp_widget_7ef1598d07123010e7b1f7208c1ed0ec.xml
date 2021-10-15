@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_ng_pro_sp_widget">
+    <m2m_sp_ng_pro_sp_widget action="DELETE">
+        <sp_angular_provider display_value="scAccordionScroll">9d60d965b7434010ca6db0b5de11a9d3</sp_angular_provider>
+        <sp_widget display_value="Copy of SC Order Guide">36f1598d07123010e7b1f7208c1ed0e4</sp_widget>
+        <sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-29 04:25:18</sys_created_on>
+        <sys_id>7ef1598d07123010e7b1f7208c1ed0ec</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>scAccordionScroll.Copy of SC Order Guide</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>m2m_sp_ng_pro_sp_widget_7ef1598d07123010e7b1f7208c1ed0ec</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-29 04:25:18</sys_updated_on>
+    </m2m_sp_ng_pro_sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</application>
+        <file_path/>
+        <instance_id>f26d1729db854c90b847ac44d49619b8</instance_id>
+        <instance_name>dev94574</instance_name>
+        <name>m2m_sp_ng_pro_sp_widget_7ef1598d07123010e7b1f7208c1ed0ec</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_ng_pro_sp_widget"><m2m_sp_ng_pro_sp_widget action="INSERT_OR_UPDATE"><sp_angular_provider display_value="scAccordionScroll">9d60d965b7434010ca6db0b5de11a9d3</sp_angular_provider><sp_widget display_value="Copy of SC Order Guide">36f1598d07123010e7b1f7208c1ed0e4</sp_widget><sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2021-08-29 04:25:18</sys_created_on><sys_id>7ef1598d07123010e7b1f7208c1ed0ec</sys_id><sys_mod_count>0</sys_mod_count><sys_name>scAccordionScroll.Copy of SC Order Guide</sys_name><sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package><sys_policy/><sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope><sys_update_name>m2m_sp_ng_pro_sp_widget_7ef1598d07123010e7b1f7208c1ed0ec</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2021-08-29 04:25:18</sys_updated_on></m2m_sp_ng_pro_sp_widget></record_update>]]></payload>
+        <payload_hash>-1571857937</payload_hash>
+        <record_name>scAccordionScroll.Copy of SC Order Guide</record_name>
+        <reverted_from/>
+        <source>36dbfaf907913010e7b1f7208c1ed0d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-29 04:25:18</sys_created_on>
+        <sys_id>36f11d8d07123010e7b1f7208c1ed082</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>17b902796260000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-29 04:25:18</sys_updated_on>
+        <type>Angular Providers</type>
+        <update_guid>7ef11d8d1c12301022ef6ae894377581</update_guid>
+        <update_guid_history>7ef11d8d1c12301022ef6ae894377581:-1571857937</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="scAccordionScroll.Copy of SC Order Guide">cf409d0407223010e7b1f7208c1ed0f2</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-07 11:59:42</sys_created_on>
+        <sys_db_object display_value="" name="m2m_sp_ng_pro_sp_widget">m2m_sp_ng_pro_sp_widget</sys_db_object>
+        <sys_id>0323d1eef8dc489b81627bcebef3a531</sys_id>
+        <sys_metadata>7ef1598d07123010e7b1f7208c1ed0ec</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>scAccordionScroll.Copy of SC Order Guide</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_scope_delete display_value="">7f3b44d21a8a418488cc620bcfd142d9</sys_scope_delete>
+        <sys_update_name>m2m_sp_ng_pro_sp_widget_7ef1598d07123010e7b1f7208c1ed0ec</sys_update_name>
+        <sys_update_version display_value="m2m_sp_ng_pro_sp_widget_7ef1598d07123010e7b1f7208c1ed0ec">36f11d8d07123010e7b1f7208c1ed082</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-07 11:59:42</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

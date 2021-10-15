@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>custom</category>
+        <client_script><![CDATA[function($scope, snAttachmentHandler, i18n) {
+  /* widget controller */
+  var c = this;
+	
+	c.toggle = c.options.toggle || false;
+	c.hide_control = c.options.hide_control || false;
+	c.task = c.options ? c.options.task : "";
+	
+	$scope.scanAttachment = function(variable) {
+		if (variable.state == 'not_available')
+			snAttachmentHandler.showMessage('error',i18n.getMessage('Upload file scan failed').withValues([variable.display_value]));
+		else
+			snAttachmentHandler.scanAttachment({'sys_id' : variable.value});
+	}
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css/>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>Copy of Variable Summarizer</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+        <name>Copy of Variable Summarizer</name>
+        <option_schema/>
+        <public>true</public>
+        <roles/>
+        <script><![CDATA[(function() {
+	data.label = options.label || gs.getMessage("Options");
+	if(options.task)
+		data.ariaLabel =  gs.getMessage("{0} for {1}", [data.label, options.task]);
+	else
+		data.ariaLabel = data.label;
+	if (options.variables) {
+		data.variables = options.variables;
+		return;
+	}
+	
+	var tableName = options.table || $sp.getParameter('table');
+	var sysId = options.sys_id || $sp.getParameter('sys_id');
+	var record = sn_std_tkt_api.TicketConfig.getTicketRecord(tableName, sysId);
+	
+	if (record == null)
+		return;
+
+	data.canRead = record.canRead();
+	if (!data.canRead)
+		return;
+	
+	data.variables = new GlobalServiceCatalogUtil().getVariablesForTask(record, true);
+	
+ })();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-28 04:53:35</sys_created_on>
+        <sys_id>27de047c07123010e7b1f7208c1ed046</sys_id>
+        <sys_mod_count>1</sys_mod_count>
+        <sys_name>Copy of Variable Summarizer</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sp_widget_27de047c07123010e7b1f7208c1ed046</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-28 04:53:51</sys_updated_on>
+        <template><![CDATA[<div ng-if="c.data.variables.length > 0" ng-init="c.variable_toggle = c.toggle">
+  <a href="javascript:void(0)" aria-expanded="{{c.variable_toggle}}" aria-label="{{data.ariaLabel}}" ng-click="c.variable_toggle = !c.variable_toggle" ng-if="!c.hide_control">
+    <span style="font-size: 12px;" class="glyphicon" ng-class="c.variable_toggle ? 'glyphicon-chevron-down' : 'glyphicon-chevron-up'"></span>
+    {{data.label}}
+  </a>
+
+  <div ng-if="c.variable_toggle" id="variables-toggle" aria-hidden="{{!c.variable_toggle}}">
+    <hr role="presentation" ng-if="!c.hide_control">
+    <div class="m-b break-word" ng-repeat="variable in c.data.variables | filter:{visible_summary:true}">
+      <label class="m-t-xs m-b-none text-muted"><b>{{::variable.label}}</b></label>
+      <div ng-if="!variable.multi_row">
+        <div ng-switch="variable.type">
+          <!-- 27 is type URL, 33 is type Attachment -->
+          <a ng-switch-when="27" class="pre-wrap" title="{{::variable.label}}" href="{{::variable.display_value}}" target="_blank">{{::variable.display_value}}</a>
+          <span ng-switch-when="33" class="file-attachment">
+          	<a ng-if="::variable.state != 'not_available'" class="pre-wrap" title="{{::variable.label}}" href="javascript:void(0);" ng-click="scanAttachment(variable)" aria-label="${Download {{variable.display_value}}}">{{::variable.display_value}}</a>
+            <span ng-if="::variable.state == 'not_available'" class="error">
+							<a class="pre-wrap" title="{{::variable.label}}" href="javascript:void(0);" ng-click="scanAttachment(variable)" aria-label="${File {{variable.display_value}} failed security scan}">{{::variable.display_value}}</a>
+             	(${File failed security scan})
+            </span>
+          </span>
+          <span ng-switch-default class="pre-wrap">{{::variable.display_value}}</span>
+        </div>
+      </div>
+      <div ng-if="variable.multi_row">
+        <a href="javascript:void(0)" uib-popover-template="'sp_multirow_vs_summarizer.html'" popover-title="{{variable.label}}" popover-placement="auto top" popover-append-to-body="true" popover-trigger="outsideClick">${Click to view}</a>
+      </div>
+    </div>
+  </div>
+</div>]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</application>
+        <file_path/>
+        <instance_id>f26d1729db854c90b847ac44d49619b8</instance_id>
+        <instance_name>dev94574</instance_name>
+        <name>sp_widget_27de047c07123010e7b1f7208c1ed046</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;custom&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[function($scope, snAttachmentHandler, i18n) {
+  /* widget controller */
+  var c = this;
+	
+	c.toggle = c.options.toggle || false;
+	c.hide_control = c.options.hide_control || false;
+	c.task = c.options ? c.options.task : "";
+	
+	$scope.scanAttachment = function(variable) {
+		if (variable.state == 'not_available')
+			snAttachmentHandler.showMessage('error',i18n.getMessage('Upload file scan failed').withValues([variable.display_value]));
+		else
+			snAttachmentHandler.scanAttachment({'sys_id' : variable.value});
+	}
+}]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css/&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data/&gt;&lt;description/&gt;&lt;docs/&gt;&lt;field_list/&gt;&lt;has_preview&gt;true&lt;/has_preview&gt;&lt;id&gt;Copy of Variable Summarizer&lt;/id&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function link(scope, element, attrs, controller) {  }]]&gt;&lt;/link&gt;&lt;name&gt;Copy of Variable Summarizer&lt;/name&gt;&lt;option_schema/&gt;&lt;public&gt;true&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function() {
+	data.label = options.label || gs.getMessage("Options");
+	if(options.task)
+		data.ariaLabel =  gs.getMessage("{0} for {1}", [data.label, options.task]);
+	else
+		data.ariaLabel = data.label;
+	if (options.variables) {
+		data.variables = options.variables;
+		return;
+	}
+	
+	var tableName = options.table || $sp.getParameter('table');
+	var sysId = options.sys_id || $sp.getParameter('sys_id');
+	var record = sn_std_tkt_api.TicketConfig.getTicketRecord(tableName, sysId);
+	
+	if (record == null)
+		return;
+
+	data.canRead = record.canRead();
+	if (!data.canRead)
+		return;
+	
+	data.variables = new GlobalServiceCatalogUtil().getVariablesForTask(record, true);
+	
+ })();]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2021-08-28 04:53:35&lt;/sys_created_on&gt;&lt;sys_id&gt;27de047c07123010e7b1f7208c1ed046&lt;/sys_id&gt;&lt;sys_mod_count&gt;1&lt;/sys_mod_count&gt;&lt;sys_name&gt;Copy of Variable Summarizer&lt;/sys_name&gt;&lt;sys_package display_value="Payment Requests" source="x_661994_paymt_req"&gt;000abe7907913010e7b1f7208c1ed0c2&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Payment Requests"&gt;000abe7907913010e7b1f7208c1ed0c2&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_27de047c07123010e7b1f7208c1ed046&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2021-08-28 04:53:51&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div ng-if="c.data.variables.length &gt; 0" ng-init="c.variable_toggle = c.toggle"&gt;
+  &lt;a href="javascript:void(0)" aria-expanded="{{c.variable_toggle}}" aria-label="{{data.ariaLabel}}" ng-click="c.variable_toggle = !c.variable_toggle" ng-if="!c.hide_control"&gt;
+    &lt;span style="font-size: 12px;" class="glyphicon" ng-class="c.variable_toggle ? 'glyphicon-chevron-down' : 'glyphicon-chevron-up'"&gt;&lt;/span&gt;
+    {{data.label}}
+  &lt;/a&gt;
+
+  &lt;div ng-if="c.variable_toggle" id="variables-toggle" aria-hidden="{{!c.variable_toggle}}"&gt;
+    &lt;hr role="presentation" ng-if="!c.hide_control"&gt;
+    &lt;div class="m-b break-word" ng-repeat="variable in c.data.variables | filter:{visible_summary:true}"&gt;
+      &lt;label class="m-t-xs m-b-none text-muted"&gt;&lt;b&gt;{{::variable.label}}&lt;/b&gt;&lt;/label&gt;
+      &lt;div ng-if="!variable.multi_row"&gt;
+        &lt;div ng-switch="variable.type"&gt;
+          &lt;!-- 27 is type URL, 33 is type Attachment --&gt;
+          &lt;a ng-switch-when="27" class="pre-wrap" title="{{::variable.label}}" href="{{::variable.display_value}}" target="_blank"&gt;{{::variable.display_value}}&lt;/a&gt;
+          &lt;span ng-switch-when="33" class="file-attachment"&gt;
+          	&lt;a ng-if="::variable.state != 'not_available'" class="pre-wrap" title="{{::variable.label}}" href="javascript:void(0);" ng-click="scanAttachment(variable)" aria-label="${Download {{variable.display_value}}}"&gt;{{::variable.display_value}}&lt;/a&gt;
+            &lt;span ng-if="::variable.state == 'not_available'" class="error"&gt;
+							&lt;a class="pre-wrap" title="{{::variable.label}}" href="javascript:void(0);" ng-click="scanAttachment(variable)" aria-label="${File {{variable.display_value}} failed security scan}"&gt;{{::variable.display_value}}&lt;/a&gt;
+             	(${File failed security scan})
+            &lt;/span&gt;
+          &lt;/span&gt;
+          &lt;span ng-switch-default class="pre-wrap"&gt;{{::variable.display_value}}&lt;/span&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div ng-if="variable.multi_row"&gt;
+        &lt;a href="javascript:void(0)" uib-popover-template="'sp_multirow_vs_summarizer.html'" popover-title="{{variable.label}}" popover-placement="auto top" popover-append-to-body="true" popover-trigger="outsideClick"&gt;${Click to view}&lt;/a&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>2071274723</payload_hash>
+        <record_name>Copy of Variable Summarizer</record_name>
+        <reverted_from/>
+        <source>36dbfaf907913010e7b1f7208c1ed0d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-28 04:53:52</sys_created_on>
+        <sys_id>53eec87c07123010e7b1f7208c1ed0b5</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>17b8b1b5f190000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-28 04:53:52</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>dbeec87c10123010e9d912ba12e04db4</update_guid>
+        <update_guid_history>dbeec87c10123010e9d912ba12e04db4:2071274723,23de047cf612301072272199d8aa7648:385320073</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Copy of Variable Summarizer">db52583007523010e7b1f7208c1ed05a</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-28 05:08:53</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>40446c46a066410f9f0254ba63479869</sys_id>
+        <sys_metadata>27de047c07123010e7b1f7208c1ed046</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Copy of Variable Summarizer</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_scope_delete display_value="">7f3b44d21a8a418488cc620bcfd142d9</sys_scope_delete>
+        <sys_update_name>sp_widget_27de047c07123010e7b1f7208c1ed046</sys_update_name>
+        <sys_update_version display_value="sp_widget_27de047c07123010e7b1f7208c1ed046">53eec87c07123010e7b1f7208c1ed0b5</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-28 05:08:53</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

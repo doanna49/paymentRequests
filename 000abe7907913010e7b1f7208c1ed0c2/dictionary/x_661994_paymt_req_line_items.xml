@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="Line Items" max_length="40" name="x_661994_paymt_req_line_items" sizeclass="9" type="collection">
+        <element choice="1" label="Category" max_length="40" name="category" type="choice">
+            <choice/>
+        </element>
+        <element choice="1" label="Cost Centre" max_length="40" name="cost_centre" type="choice">
+            <choice/>
+        </element>
+        <element label="Gst Included in Total" max_length="20" name="gst_included_in_total" type="currency"/>
+        <element attributes="ignore_filter_on_new=true" default="javascript:global.getNextObjNumberPadded();" label="Line ID" max_length="40" name="number" type="string"/>
+        <element label="Purchase Order" max_length="32" name="purchase_order" reference="x_661994_paymt_req_purchase_order" type="reference"/>
+        <element label="Reason for payment" max_length="100" name="reason_for_payment" type="string"/>
+        <element label="Total AMount" max_length="20" name="total_amount" type="currency"/>
+        <element choice="1" label="WBS" max_length="40" name="wbs" type="choice">
+            <choice/>
+        </element>
+        <index name="index">
+            <element name="purchase_order"/>
+        </index>
+    </element>
+</database>

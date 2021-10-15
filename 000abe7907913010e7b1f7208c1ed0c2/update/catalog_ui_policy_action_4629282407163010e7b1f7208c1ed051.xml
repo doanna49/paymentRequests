@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="catalog_ui_policy_action">
+    <catalog_ui_policy_action action="INSERT_OR_UPDATE">
+        <catalog_item display_value="Create  a Payment Request">176b0f2807713010e7b1f7208c1ed0f0</catalog_item>
+        <catalog_variable>IO:0358cd9a07717010e7b1f7208c1ed0da</catalog_variable>
+        <cleared>false</cleared>
+        <disabled>ignore</disabled>
+        <field/>
+        <mandatory>true</mandatory>
+        <order>100</order>
+        <sys_class_name>catalog_ui_policy_action</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-27 12:09:58</sys_created_on>
+        <sys_id>4629282407163010e7b1f7208c1ed051</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>enter_trading_name</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>catalog_ui_policy_action_4629282407163010e7b1f7208c1ed051</sys_update_name>
+        <sys_updated_by>system</sys_updated_by>
+        <sys_updated_on>2021-08-27 13:12:04</sys_updated_on>
+        <table/>
+        <ui_policy display_value="Hide ABN Fields">3d29282407163010e7b1f7208c1ed035</ui_policy>
+        <variable>enter_trading_name</variable>
+        <variable_set/>
+        <visible>true</visible>
+    </catalog_ui_policy_action>
+</record_update>

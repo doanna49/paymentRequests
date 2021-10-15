@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element audit="true" extends="sn_customerservice_case" label="Payment Request" max_length="40" name="x_661994_paymt_req_purchase_order" sizeclass="25" type="collection">
+        <element label="ABN Number" max_length="100" name="abn_number" type="string"/>
+        <element label="ABN Status" max_length="100" name="abn_status" type="string"/>
+        <element label="ABN Type Name" max_length="100" name="abn_type_name" type="string"/>
+        <element label="Account Number" max_length="100" name="account_number" type="string"/>
+        <element choice="1" label="Bank Country" max_length="40" name="bank_country" type="choice">
+            <choice/>
+        </element>
+        <element label="Bank Name" max_length="100" name="bank_name" type="string"/>
+        <element label="Bank/Routing Code" max_length="100" name="bank_routing_code" type="string"/>
+        <element label="Beneficiary Account Name" max_length="100" name="beneficiary_account_name" type="string"/>
+        <element label="BSB Number" max_length="100" name="bsb_number" type="string"/>
+        <element choice="1" label="Cost Centre" max_length="40" name="coste_centre" type="choice">
+            <choice/>
+        </element>
+        <element label="Description of expense" max_length="100" name="description_of_expense" type="string"/>
+        <element label="Email" max_length="100" name="email" type="string"/>
+        <element choice="1" label="Expense Account" max_length="40" name="expense_account" type="choice">
+            <choice/>
+        </element>
+        <element choice="1" label="Expense Category" max_length="40" name="expense_category" type="choice">
+            <choice/>
+        </element>
+        <element label="IBAN Number" max_length="100" name="iban_number" type="string"/>
+        <element label="Is Asset Funded by Research or Grant" max_length="40" name="is_asset_funded" type="boolean"/>
+        <element label="Non-Vendor Entity name" max_length="100" name="non_vendor_entity_name" type="string"/>
+        <element choice="1" label="Non-Vendor Type" max_length="40" name="non_vendor_type" type="choice">
+            <choice/>
+        </element>
+        <element label="Would you like to notify someone else about this payment request?" max_length="32" name="notify_someone" reference="sys_user" type="reference"/>
+        <element label="Order Currency" max_length="32" name="order_currency" reference="fx_currency" type="reference"/>
+        <element label="Order Validity End Date" max_length="40" name="order_validity_end_date" type="glide_date"/>
+        <element label="Order Validity Start Date" max_length="40" name="order_validity_start_date" type="glide_date"/>
+        <element label="PO Number" max_length="100" name="po_number" type="string"/>
+        <element label="PRF Approver 1" max_length="32" name="prf_approver_1" reference="sys_user" type="reference"/>
+        <element label="PRF Approver 2" max_length="32" name="prf_approver_2" reference="sys_user" type="reference"/>
+        <element label="PRF Approver 3" max_length="32" name="prf_approver_3" reference="sys_user" type="reference"/>
+        <element label="Purchasing group Code" max_length="100" name="purchasing_group_code" type="string"/>
+        <element label="Purchasing group name" max_length="100" name="purchasing_group_name" type="string"/>
+        <element label="Brief reason for payment" max_length="400" name="reason_for_payment" type="string"/>
+        <element label="Recipient Address" max_length="32" name="recipient_address" reference="cmn_location" type="reference"/>
+        <element label="Recipient First Name" max_length="100" name="recipient_first_name" type="string"/>
+        <element label="Recipient Last Name" max_length="100" name="recipient_last_name" type="string"/>
+        <element label="Recipient Phone" max_length="40" name="recipient_phone" type="phone_number_e164"/>
+        <element default="javascript:gs.getUserID();" dynamic_default_value="2fd8e97bef3221002841f7f775c0fbc1" label="Requested For" max_length="32" name="requested_for" reference="sys_user" type="reference" use_dynamic_default="true"/>
+        <element choice="1" label="Select Type of Order" max_length="40" name="select_type_of_order" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="PO" sequence="1" value="po"/>
+            </choice>
+        </element>
+        <element choice="1" label="Would you like to split expense across more than one cost centre or WBS?" max_length="40" name="split_expense" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="No" value="0"/>
+                <element inactive_on_update="false" label="Yes" value="1"/>
+            </choice>
+        </element>
+        <element label="Staff Name" max_length="100" name="staff_name" type="string"/>
+        <element label="Staff Number" max_length="32" name="staff_number" reference="sys_user" type="reference"/>
+        <element label="Student name" max_length="100" name="student_name" type="string"/>
+        <element label="Student Number" max_length="32" name="student_number" reference="sys_user" type="reference"/>
+        <element label="SWIFT Code" max_length="100" name="swift_code" type="string"/>
+        <element label="Total Value of Order" max_length="100" name="total_value_of_order" type="string"/>
+        <element label="Total Value of Order AUD" max_length="20" name="total_value_of_order_aud" type="currency"/>
+        <element choice="1" label="Trading Name" max_length="100" name="trading_name" type="choice">
+            <choice/>
+        </element>
+        <element choice="1" label="Select type of order" max_length="40" name="type_of_order" type="choice">
+            <choice/>
+        </element>
+        <element label="Value of payment" max_length="20" name="value_of_payment" type="currency"/>
+        <element label="Enter Vendor Name" max_length="100" name="vendor_name" type="string"/>
+        <element choice="1" label="WBS" max_length="40" name="wbs" type="choice">
+            <choice/>
+        </element>
+        <element choice="1" default="student" label="Who is the Payment Request For?" max_length="400" name="who_is_the_payment_request_for" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Student" sequence="1" value="student"/>
+                <element inactive_on_update="false" label="Staff" sequence="2" value="staff"/>
+                <element inactive_on_update="false" label="Non-Paid LTU Staff" sequence="3" value="non_paid"/>
+            </choice>
+        </element>
+    </element>
+</database>

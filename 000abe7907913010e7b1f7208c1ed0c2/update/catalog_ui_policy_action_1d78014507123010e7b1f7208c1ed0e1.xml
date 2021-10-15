@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="catalog_ui_policy_action">
+    <catalog_ui_policy_action action="INSERT_OR_UPDATE">
+        <catalog_item display_value="Create  a Payment Request">176b0f2807713010e7b1f7208c1ed0f0</catalog_item>
+        <catalog_variable/>
+        <cleared>false</cleared>
+        <disabled>ignore</disabled>
+        <field/>
+        <mandatory>ignore</mandatory>
+        <order>100</order>
+        <sys_class_name>catalog_ui_policy_action</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-29 03:43:41</sys_created_on>
+        <sys_id>1d78014507123010e7b1f7208c1ed0e1</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>summary_1_json</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>catalog_ui_policy_action_1d78014507123010e7b1f7208c1ed0e1</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-29 03:43:41</sys_updated_on>
+        <table/>
+        <ui_policy display_value="Set HTML as Readonly, hide JSON data">1178014507123010e7b1f7208c1ed0df</ui_policy>
+        <variable>summary_1_json</variable>
+        <variable_set/>
+        <visible>false</visible>
+    </catalog_ui_policy_action>
+</record_update>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>standard</category>
+        <client_script><![CDATA[function($scope) {
+    var c = this;
+    //	c.data.instructions ='DVC';
+    var message = '';
+    var g_form = $scope.page.g_form;
+    var field = $scope.page.abn_details;
+    var fieldSysId = field.sys_id.toString();
+    var grItem = new GlideRecord('item_option_new');
+    grItem.addQuery('sys_id', fieldSysId);
+    grItem.query(varInfo);
+
+    function varInfo(grItem) {
+        if (grItem.next()) {
+            c.data.instructions = grItem.getValue('instructions').toString();
+        }
+    }
+    //alert(g_form.getValue('abn_number'));
+    //c.data.instructions = g_form.getValue('abn_number');
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.ssn {
+  display: inline;
+}
+
+.ssn.area {
+  width: 4em;
+}
+
+.ssn.group {
+  width: 3em;
+}
+
+.ssn.serial {
+  width: 5em;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>copy_of_variable_ssn</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+        <name>Copy of Variable SSN</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+	var catItemID = $sp.getParameter("sys_id");
+})();
+]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-28 05:11:51</sys_created_on>
+        <sys_id>0703d03007523010e7b1f7208c1ed079</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_name>Copy of Variable SSN</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sp_widget_0703d03007523010e7b1f7208c1ed079</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-29 04:01:21</sys_updated_on>
+        <template><![CDATA[ <div class="alert alert-warning" ng-if="!data.columns_specified">
+      No table definition provided, define your table information and then click Setup Data Table to start building the table definition record
+    </div>
+<div style="padding: 5px 0px 1px 10px; background:#30B5A0;border-radius: 3px;color:white;" ng-bind-html="c.data.instructions"></div>]]></template>
+    </sp_widget>
+</record_update>

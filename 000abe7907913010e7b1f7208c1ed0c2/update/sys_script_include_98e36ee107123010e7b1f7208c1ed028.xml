@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include">
+    <sys_script_include action="INSERT_OR_UPDATE">
+        <access>package_private</access>
+        <active>true</active>
+        <api_name>x_661994_paymt_req.checkAttachmentType</api_name>
+        <caller_access/>
+        <client_callable>true</client_callable>
+        <description/>
+        <name>checkAttachmentType</name>
+        <script><![CDATA[var checkAttachmentType = Class.create();
+checkAttachmentType.prototype = Object.extendsObject(global.AbstractAjaxProcessor, {
+
+ checkType: function() {
+		//gs.info("here");
+        var sys_id_attach = this.getParameter('sysparm_id'); //the parameter passed from the client script
+        var gr = new GlideRecord('sys_attachment'); //querying on attachment table
+        gr.get('sys_id', sys_id_attach);
+        if (gr.file_name.toString().indexOf('.PNG') != '-1' || gr.file_name.toString().indexOf('.png') != '-1') {
+            //gs.info(gr.file_name.toString().indexOf('.png') != '-1');
+            return true;
+        } else
+			{
+				gr.state ='not_available';
+            return false;
+			}
+    },
+
+
+
+
+
+
+
+    type: 'checkAttachmentType'
+
+
+
+
+});]]></script>
+        <sys_class_name>sys_script_include</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-30 23:44:58</sys_created_on>
+        <sys_id>98e36ee107123010e7b1f7208c1ed028</sys_id>
+        <sys_mod_count>8</sys_mod_count>
+        <sys_name>checkAttachmentType</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy>read</sys_policy>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sys_script_include_98e36ee107123010e7b1f7208c1ed028</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-01 11:45:24</sys_updated_on>
+    </sys_script_include>
+</record_update>

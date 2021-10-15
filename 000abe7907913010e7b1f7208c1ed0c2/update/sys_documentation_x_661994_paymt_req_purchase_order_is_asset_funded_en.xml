@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_documentation element="is_asset_funded" label="Is Asset Funded by Research or Grant" language="en" table="x_661994_paymt_req_purchase_order">
+        <sys_documentation action="INSERT_OR_UPDATE">
+            <element>is_asset_funded</element>
+            <help/>
+            <hint/>
+            <label>Is Asset Funded by Research or Grant</label>
+            <language>en</language>
+            <name>x_661994_paymt_req_purchase_order</name>
+            <plural>Is Asset Funded by Research or Grants</plural>
+            <sys_class_name>sys_documentation</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-08-07 04:48:36</sys_created_on>
+            <sys_id>215408c607713010e7b1f7208c1ed05f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>Is Asset Funded by Research or Grant</sys_name>
+            <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+            <sys_update_name>sys_documentation_x_661994_paymt_req_purchase_order_is_asset_funded_en</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-08-07 04:48:36</sys_updated_on>
+            <url/>
+            <url_target/>
+        </sys_documentation>
+    </sys_documentation>
+</record_update>
