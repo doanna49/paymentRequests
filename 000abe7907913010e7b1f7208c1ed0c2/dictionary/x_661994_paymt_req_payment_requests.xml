@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="Payment Requests" max_length="40" name="x_661994_paymt_req_payment_requests" sizeclass="1" type="collection">
+        <element attributes="edge_encryption_enabled=true" default="javascript:global.getNextObjNumberPadded();" label="Number" max_length="40" name="number" type="string"/>
+        <element attributes="encode_utf8=false" label="Requested For" max_length="32" name="requested_for" reference="sys_user" type="reference"/>
+        <element label="Staff name" max_length="100" name="staff_name" type="string"/>
+        <element label="Staff Number" max_length="32" name="staff_number" reference="sys_user" type="reference"/>
+        <element label="Student Name" max_length="100" name="student_name" type="string"/>
+        <element default="javascript:current.getTableName();" label="Class" max_length="80" name="sys_class_name" type="sys_class_name"/>
+        <element choice="1" label="Who is the payment Request for" max_length="40" name="type_of_reciepient" type="choice">
+            <choice>
+                <element inactive_on_update="false" label="Students" sequence="1" value="1"/>
+                <element inactive_on_update="false" label="Non-Paid LTU Staff including Conagoths, Adjunct, Emeritus Professors and Honorary staff" sequence="2" value="2"/>
+                <element inactive_on_update="false" label="Staff: awards and prizes only (area to submit on behalf" sequence="3" value="3"/>
+            </choice>
+        </element>
+        <element label="Value of Payment" max_length="20" name="value_of_payment" type="currency"/>
+        <element label="Student Number" max_length="32" name="who_is_the_payment_request_for" reference="sys_user" type="reference"/>
+        <index name="index">
+            <element name="who_is_the_payment_request_for"/>
+        </index>
+        <index name="index2">
+            <element name="requested_for"/>
+        </index>
+        <index name="index3">
+            <element name="sys_class_name"/>
+        </index>
+        <index name="index4">
+            <element name="staff_number"/>
+        </index>
+    </element>
+</database>

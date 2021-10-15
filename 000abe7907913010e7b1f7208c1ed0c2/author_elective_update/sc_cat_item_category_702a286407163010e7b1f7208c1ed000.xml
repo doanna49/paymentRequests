@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sc_cat_item_category">
+    <sc_cat_item_category action="DELETE">
+        <sc_cat_item display_value="test">541a646407163010e7b1f7208c1ed0cd</sc_cat_item>
+        <sc_category display_value="Software">2809952237b1300054b6a3549dbe5dd4</sc_category>
+        <sys_class_name>sc_cat_item_category</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-27 12:14:15</sys_created_on>
+        <sys_id>702a286407163010e7b1f7208c1ed000</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Software.test</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sc_cat_item_category_702a286407163010e7b1f7208c1ed000</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-27 12:14:15</sys_updated_on>
+    </sc_cat_item_category>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</application>
+        <file_path/>
+        <instance_id>f26d1729db854c90b847ac44d49619b8</instance_id>
+        <instance_name>dev94574</instance_name>
+        <name>sc_cat_item_category_702a286407163010e7b1f7208c1ed000</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sc_cat_item_category"><sc_cat_item_category action="INSERT_OR_UPDATE"><sc_cat_item display_value="test">541a646407163010e7b1f7208c1ed0cd</sc_cat_item><sc_category display_value="Software">2809952237b1300054b6a3549dbe5dd4</sc_category><sys_class_name>sc_cat_item_category</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2021-08-27 12:14:15</sys_created_on><sys_id>702a286407163010e7b1f7208c1ed000</sys_id><sys_mod_count>0</sys_mod_count><sys_name>Software.test</sys_name><sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package><sys_policy/><sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope><sys_update_name>sc_cat_item_category_702a286407163010e7b1f7208c1ed000</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2021-08-27 12:14:15</sys_updated_on></sc_cat_item_category></record_update>]]></payload>
+        <payload_hash>-1371326209</payload_hash>
+        <record_name>Software.test</record_name>
+        <reverted_from/>
+        <source>36dbfaf907913010e7b1f7208c1ed0d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-27 12:14:15</sys_created_on>
+        <sys_id>742a286407163010e7b1f7208c1ed003</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>17b878833cf0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-27 12:14:15</sys_updated_on>
+        <type>Catalog Item Category</type>
+        <update_guid>f82a2864b6163010f856489bc5bd1a02</update_guid>
+        <update_guid_history>f82a2864b6163010f856489bc5bd1a02:-1371326209</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Software.test">3f3aa86407163010e7b1f7208c1ed06b</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-27 12:14:43</sys_created_on>
+        <sys_db_object display_value="" name="sc_cat_item_category">sc_cat_item_category</sys_db_object>
+        <sys_id>52116881b3814fb9a7dccbf1e8f79371</sys_id>
+        <sys_metadata>702a286407163010e7b1f7208c1ed000</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Software.test</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_scope_delete display_value="">7f3b44d21a8a418488cc620bcfd142d9</sys_scope_delete>
+        <sys_update_name>sc_cat_item_category_702a286407163010e7b1f7208c1ed000</sys_update_name>
+        <sys_update_version display_value="sc_cat_item_category_702a286407163010e7b1f7208c1ed000">742a286407163010e7b1f7208c1ed003</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-27 12:14:43</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

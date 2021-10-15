@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function($scope, spUtil, $location) {
+    /* widget controller */
+    var c = this;
+    var g_form = $scope.page.g_form;
+
+    $scope.$watch(function() {
+        return g_form.getValue('item_details');
+    }, function(value) {
+        if (value == '') {
+            c.data.entity = 2;
+        } else {
+            c.data.entity = 1;
+		//	alert($scope.data.table);
+			c.data.action='getConversionRate';
+			//alert(c.data.rate);
+            c.data.entity_value = getSummaryDetails(value);
+        }
+    });
+	
+  $scope.$watch(function() {
+        return g_form.getValue('requested_for');
+    }, function(value) {
+        if (value == '') {
+            c.data.entity = 2;
+        } else {
+            c.data.entity = 1;
+		//	alert($scope.data.table);
+			c.data.action='getConversionRate';
+			//alert(c.data.rate);
+            c.data.entity_value = getSummaryDetails(value);
+        }
+    });	
+	
+	
+
+    function getSummaryDetails() {
+        var totAmount = 0;
+        var table_row_start = '<tr>';
+        var table_row_end = '</tr>';
+        var table_column_start = '<td style="width: 73.1pt; border: solid windowtext 1.0pt; border-top: none; padding: 0cm 5.4pt 0cm 5.4pt;" valign="top"><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;"><br />';
+        var table_column_end = '</p></td>';
+        var item_details = '';
+        var array = {};
+        array = JSON.parse(g_form.getValue('item_details'));
+        for (var i = 0; i < array.length; i++) {
+            var itemJson = array[i];
+            item_details += table_row_start;
+            //   for (var obj in itemJson) {
+            item_details += table_column_start + itemJson.reason_for_payment + table_column_end;
+            item_details += table_column_start + itemJson.cost_centre + table_column_end;
+            item_details += table_column_start + itemJson.wbs + table_column_end;
+            item_details += table_column_start + itemJson.category + table_column_end;
+            item_details += table_column_start + itemJson.total_amount + table_column_end;
+            item_details += table_column_start + itemJson.gst_total_amount + table_column_end;
+            totAmount += itemJson.total_amount * 1;
+
+            //  }
+            item_details += table_row_end;
+        }
+		
+		var tot_amount_aud = totAmount*c.data.rate;
+
+        var total_value = '<p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Total Value in payment currency :' + totAmount + '</p>';
+        var total_value_aud = '<p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Total Value in AUD $ :'+tot_amount_aud +'</p>';
+
+        var details = '<legend class= "container-caption ng-scope"> <span class= "h4 ng-binding" role="heading" aria-level="3">Review Summary of the request prior to submission</span></legend><div class= "wrapper-md r-2x ng-scope b" ng-class="{+' + 'b' + ': !c.isMEE}"><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Recipient Name : ' + g_form.getValue('student_name') + '</p><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Recipient Category :</p><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Payment Details</p><table class="table table-bordered table-striped m-b-xs" ng-class="{' + 'm-b' + ': c.isMEE, ' + 'm-b-xs' + ': !c.isMEE}"><tbody><tr style="height: 16.1pt;"><th style="width: 73.1pt; border: solid windowtext 1.0pt; padding: 0cm 5.4pt 0cm 5.4pt;" valign="top"><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Description of Expense</p></th><th style="width: 73.1pt; border: solid windowtext 1.0pt; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;" valign="top"><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Cost Centre</p></th><th style="width: 73.1pt; border: solid windowtext 1.0pt; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;" valign="top"><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">WBS</p></th><th style="width: 73.1pt; border: solid windowtext 1.0pt; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;" valign="top"><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Category</p></th><th style="width: 73.1pt; border: solid windowtext 1.0pt; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;" valign="top"><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">Total Amount</p></th><th style="width: 73.1pt; border: solid windowtext 1.0pt; border-left: none; padding: 0cm 5.4pt 0cm 5.4pt;" valign="top"><p style="margin: 0cm 0cm 0.0001pt; line-height: normal; font-size: 11pt; font-family: Calibri, sans-serif;">GST Included in Total</p></th></tr>' + item_details + '</table>' + total_value + total_value_aud + '</div>';
+
+        return details;
+    }
+
+
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>a:link {&#13;
+  color: #D9534F;&#13;
+  background-color: transparent;&#13;
+  text-decoration: none;&#13;
+}&#13;
+a:visited {&#13;
+  color: #D9534F;&#13;
+  background-color: transparent;&#13;
+  text-decoration: none;&#13;
+}&#13;
+a:hover {&#13;
+  color: #7373ae;&#13;
+  background-color: transparent;&#13;
+}&#13;
+&#13;
+p {&#13;
+  color:#000000;&#13;
+}&#13;
+</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id>summary_payment_request</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {
+    var companyName = input.c.data.entity;
+	
+	data.result = "https://owdev.service-now.com/sp?id=sc_cat_item&sys_id=e8aee7f1db0c7410be2d1cbd139619c0&sys_company_name"+companyName;
+
+  
+}]]></link>
+        <name>summary_payment_request</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+	gs.info('DVC get value'+$sp.getValue('payment_currency'));
+	var gr = new GlideRecord('fx_conversion_rate');
+	gr.get('sys_id','4555525f4155445f3230323130393033');
+	data.rate =gr.rate.getDisplayValue();
+
+
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-29 05:51:29</sys_created_on>
+        <sys_id>b214214d07523010e7b1f7208c1ed0b7</sys_id>
+        <sys_mod_count>75</sys_mod_count>
+        <sys_name>summary_payment_request</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sp_widget_b214214d07523010e7b1f7208c1ed0b7</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-06 12:18:38</sys_updated_on>
+        <template><![CDATA[<div style="padding: 5px 0px 1px 10px;" ng-bind-html="c.data.entity_value"></div>
+]]></template>
+    </sp_widget>
+</record_update>

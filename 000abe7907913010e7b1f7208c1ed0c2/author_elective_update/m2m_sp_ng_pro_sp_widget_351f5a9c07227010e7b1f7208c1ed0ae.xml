@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_ng_pro_sp_widget">
+    <m2m_sp_ng_pro_sp_widget action="DELETE">
+        <sp_angular_provider display_value="scToggleData">c045f99a0b67320014ea425663673a25</sp_angular_provider>
+        <sp_widget display_value="Copy of SC Catalog Item">691fd69c07227010e7b1f7208c1ed00f</sp_widget>
+        <sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-08 12:22:26</sys_created_on>
+        <sys_id>351f5a9c07227010e7b1f7208c1ed0ae</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>scToggleData.Copy of SC Catalog Item</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>m2m_sp_ng_pro_sp_widget_351f5a9c07227010e7b1f7208c1ed0ae</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-08 12:22:26</sys_updated_on>
+    </m2m_sp_ng_pro_sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</application>
+        <file_path/>
+        <instance_id>f26d1729db854c90b847ac44d49619b8</instance_id>
+        <instance_name>dev94574</instance_name>
+        <name>m2m_sp_ng_pro_sp_widget_351f5a9c07227010e7b1f7208c1ed0ae</name>
+        <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="m2m_sp_ng_pro_sp_widget"><m2m_sp_ng_pro_sp_widget action="INSERT_OR_UPDATE"><sp_angular_provider display_value="scToggleData">c045f99a0b67320014ea425663673a25</sp_angular_provider><sp_widget display_value="Copy of SC Catalog Item">691fd69c07227010e7b1f7208c1ed00f</sp_widget><sys_class_name>m2m_sp_ng_pro_sp_widget</sys_class_name><sys_created_by>admin</sys_created_by><sys_created_on>2021-09-08 12:22:26</sys_created_on><sys_id>351f5a9c07227010e7b1f7208c1ed0ae</sys_id><sys_mod_count>0</sys_mod_count><sys_name>scToggleData.Copy of SC Catalog Item</sys_name><sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package><sys_policy/><sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope><sys_update_name>m2m_sp_ng_pro_sp_widget_351f5a9c07227010e7b1f7208c1ed0ae</sys_update_name><sys_updated_by>admin</sys_updated_by><sys_updated_on>2021-09-08 12:22:26</sys_updated_on></m2m_sp_ng_pro_sp_widget></record_update>]]></payload>
+        <payload_hash>-794110450</payload_hash>
+        <record_name>scToggleData.Copy of SC Catalog Item</record_name>
+        <reverted_from/>
+        <source>36dbfaf907913010e7b1f7208c1ed0d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-08 12:22:26</sys_created_on>
+        <sys_id>391f5a9c07227010e7b1f7208c1ed0b0</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>17bc55c02170000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-08 12:22:26</sys_updated_on>
+        <type>Angular Providers</type>
+        <update_guid>711f5a9cd5227010fee5536b1d3b1fb0</update_guid>
+        <update_guid_history>711f5a9cd5227010fee5536b1d3b1fb0:-794110450</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="scToggleData.Copy of SC Catalog Item">7651e3a007223010e7b1f7208c1ed030</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-09 11:50:27</sys_created_on>
+        <sys_db_object display_value="" name="m2m_sp_ng_pro_sp_widget">m2m_sp_ng_pro_sp_widget</sys_db_object>
+        <sys_id>2b7276d762c94a1299d1764e4d4f4a79</sys_id>
+        <sys_metadata>351f5a9c07227010e7b1f7208c1ed0ae</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>scToggleData.Copy of SC Catalog Item</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_scope_delete display_value="">7f3b44d21a8a418488cc620bcfd142d9</sys_scope_delete>
+        <sys_update_name>m2m_sp_ng_pro_sp_widget_351f5a9c07227010e7b1f7208c1ed0ae</sys_update_name>
+        <sys_update_version display_value="m2m_sp_ng_pro_sp_widget_351f5a9c07227010e7b1f7208c1ed0ae">391f5a9c07227010e7b1f7208c1ed0b0</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-09 11:50:27</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>

@@ -1,0 +1,704 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function($scope, spMacro, spUtil, $uibModal, $http, dateUtils, $rootScope) {
+	
+	$scope.table_inputs = {};
+	$scope.table_inputs[$scope.data.json_variable] = "";
+	$scope.table_inputs[$scope.data.html_variable] = "";
+	
+	$scope.column_count = 0;
+	$scope.temp_columns = [];
+	$scope.table_data = [];
+	$scope.edit_mode = false;
+	
+	$scope.dateFormat = dateUtils.SYS_DATE_FORMAT;
+
+	if ($rootScope.user && $rootScope.user.date_format) {
+		$scope.dateFormat = $rootScope.user.date_format;
+	}
+	
+	var bMandatoryState = false;
+	
+	$scope.phone = '5551231231';
+	
+	$scope.mandatory_filled = function() {
+		if ( $scope.table_inputs[$scope.data.json_variable] != "" && $scope.table_inputs[$scope.data.html_variable] != "" ) {
+			return true;
+		}
+		
+		return false;
+	};
+	
+	$scope.setMandatoryState = function(bState) {
+		if ( bState == null ) { bState = true;}
+		var mandatoryList = [];
+		if ( bState ) {
+			mandatoryList = [{"label":$scope.data.title}];
+		}
+		
+		bMandatoryState = (mandatoryList.length > 0);
+		$scope.$emit('jb.update.custommandatory', mandatoryList);
+	};
+	
+	$scope.setupTempColumns = function(column_count) {
+		$scope.temp_columns = [];
+		for ( var i=0; i<column_count; i++ ) {
+			$scope.temp_columns.push({"label":"Column "+(i+1), "type":"text"});
+		}
+	};
+	
+	$scope.goToEditMode = function() {
+		if ( $scope.data.table_options.table_definition != "" ) {
+			window.open("../u_table_variable.do?sys_id="+$scope.data.table_options.table_definition);
+		} else {
+			if ( $scope.data.table_options.fields.length > 0 ) {
+				$scope.temp_columns = $scope.data.table_options.fields;
+			}
+			if ( $scope.temp_columns.length == 0 ) {
+				$scope.setupTempColumns(1);
+			}
+		
+			$scope.edit_mode = true;
+		}
+	};
+	
+	$scope.addColumn = function() {
+		var iIndex = $scope.temp_columns.length;
+		$scope.temp_columns.push({"label":"Column "+(iIndex+1), "type":"text"});
+	};
+	
+	$scope.getColumnSummary = function(columnObj) {
+		var returnInfo = "";
+		returnInfo += "Type: "+columnObj.type;
+		if ( columnObj.type == "number") {
+			returnInfo += "<div>Min value: "+columnObj.min+"</div>";
+			returnInfo += "<div>Mas value: "+columnObj.max+"</div>";
+		}
+		if ( columnObj.type == "reference") {
+			returnInfo += "<div>Table: "+columnObj.table+"</div>";
+			returnInfo += "<div>Display Field: "+columnObj.displayField+"</div>";
+			returnInfo += "<div>Value Field: "+columnObj.valueField+"</div>";
+			returnInfo += "<div>Search Field(s): "+columnObj.searchFields+"</div>";
+		}
+		if ( typeof columnObj.value != "undefined") {
+			if ( columnObj.type == "number" && columnObj.value >= 0) {
+				returnInfo += "<div>Default Value:"+columnObj.value+"</div>";	
+			} else {
+				if ( columnObj.value != "") {
+					returnInfo += "<div>Default Value:"+columnObj.value+"</div>";
+				}
+			}
+			
+		}
+		
+		return returnInfo;
+	};
+	
+	$scope.editColumn = function( columnObj, iIndex ) {
+		var modalInstance = $uibModal.open({
+			templateUrl: 'jb_editcolumn_template_v2',
+			size: 'md',
+			scope: $scope,
+			controller: function EditColumnModalCtrl($scope, $uibModalInstance) {
+				$scope.column = angular.copy(columnObj);
+				function closeModal() {
+					$uibModalInstance.dismiss('cancel');
+				}
+ 
+				$scope.ok = function () {
+					if ( $scope.column.type == "number" && $scope.column.value != "" ) {
+						$scope.column.value = parseInt($scope.column.value);
+					}
+					$scope.temp_columns[iIndex] = angular.copy($scope.column);
+					closeModal();
+				}
+				
+				$scope.deleteColumn = function() {
+					$scope.temp_columns.splice(iIndex, 1);
+					closeModal();
+				}
+ 
+				$scope.cancel = function () {
+					closeModal();
+				}
+						
+			}
+		});
+	};
+	
+	$scope.setupTableData = function() {
+		var fieldMap = {};
+		
+		for ( var i=0; i<$scope.data.table_options.fields.length; i++ ) {
+			if ( typeof $scope.data.table_options.fields[i].type == "undefined") {
+				$scope.data.table_options.fields[i].type = "text";
+			}
+			if ( typeof $scope.data.table_options.fields[i].value == "undefined") {
+				$scope.data.table_options.fields[i].value = "";
+			}
+			
+			fieldMap[$scope.data.table_options.fields[i].name] = i;
+		}
+		
+		if ( $scope.data.title != "" ){
+			if ($scope.page.g_form) {
+				//console.log('Set title to:'+$scope.data.title);
+				$scope.page.g_form.setLabel($scope.data.json_variable, $scope.data.title);
+				$scope.page.g_form.setLabel($scope.data.html_variable, $scope.data.title);
+				$scope.page.g_form.setMandatory($scope.data.json_variable, false);
+			}
+		}
+		var bHasDefaultData = ($scope.data.table_options.default_data_json.length > 0);
+		
+		$scope.table_data = [];
+		for ( var x=0; x<$scope.data.table_options.row_count; x++ ) {
+			var tableRow = {};
+			tableRow.number = x;
+			tableRow.fields = angular.copy($scope.data.table_options.fields);
+			if ( bHasDefaultData ) {
+				if ( typeof $scope.data.table_options.default_data_json[x] != "undefined" ) {
+					var defaultDataRow = $scope.data.table_options.default_data_json[x];
+					for (var fieldName in defaultDataRow) {
+						if (defaultDataRow.hasOwnProperty(fieldName)) {
+							if ( typeof fieldMap[fieldName] != "undefined" ) {
+								if ( defaultDataRow[fieldName] != "" ) {
+									if ( tableRow.fields[fieldMap[fieldName]].type == "reference" ) {
+										tableRow.fields[fieldMap[fieldName]].value = {
+											value:defaultDataRow[fieldName].split("::")[0],
+											displayValue:defaultDataRow[fieldName].split("::")[1]
+										};
+									} else {
+										tableRow.fields[fieldMap[fieldName]].value = defaultDataRow[fieldName];
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			
+			$scope.table_data.push(tableRow);
+		}
+		
+		
+	};
+	
+	$scope.setupTable = function() {
+		var postData = {};
+		postData.sysparm_macro_data = JSON.stringify($scope.data.table_options);
+		postData.sysparm_macro_title = $scope.data.title;
+		$http.post("/api/0015/jb_utils/create_new_tabledef/"+$scope.page.field.sys_id, postData).then(function(response) {
+			if (response.status === 200) {
+				spUtil.addInfoMessage("${Table data saved}");
+			} else {
+				alert('Error in response, HTTP Code:'+response.status);
+			}
+			window.location.reload();
+		});
+	};
+	
+	$scope.addRow = function() {
+		$scope.table_inputs[$scope.data.json_variable] = "";
+		$scope.table_inputs[$scope.data.html_variable] = "";
+		$scope.data.table_options.row_count++;
+		var tableRow = {};
+		tableRow.number = $scope.data.table_options.row_count - 1;
+		tableRow.fields = angular.copy($scope.data.table_options.fields);
+		$scope.table_data.push(tableRow);
+		
+		if ( $scope.data.table_options.add_row_script != "" ) {
+			$scope.runScript($scope.data.table_options.add_row_script);
+		}
+		
+	};
+	
+	$scope.deleteRow = function(rowNumber) {
+		$scope.table_data.splice(rowNumber, 1);
+		$scope.data.table_options.row_count = $scope.table_data.length;
+		
+		if ( $scope.data.table_options.remove_row_script != "" ) {
+			$scope.runScript($scope.data.table_options.remove_row_script);
+		}
+		
+	};
+	
+	// Don't overwrite use input
+	$scope.fields_changed = [];
+	$scope.change = function(field,value) {
+		var index = $scope.fields_changed.indexOf(field);
+		if (!value) {
+			if (index >= 0)
+				$scope.fields_changed.splice(index, 1);
+		} else {
+			if (index < 0)
+				$scope.fields_changed.push(field);
+		}
+	}
+	$scope.hasChanged = function() {
+		return ($scope.fields_changed.length > 0);
+	}
+	
+	$scope.processTableDataChange = function() {
+		var bComplete = true;
+		
+		if ( !$scope.data.columns_specified ) { return;}
+		
+		loop1:
+		for ( var x=0; x<$scope.table_data.length; x++ ) {
+			loop2:
+			for ( var y=0;y<$scope.table_data[x].fields.length;y++) {
+				if ( $scope.isVisibleColumn(y)) {
+					if ( typeof $scope.table_data[x].fields[y].value == "undefined") {
+						break loop1;
+					}
+					if ( $scope.table_data[x].fields[y].type != "number" && $scope.table_data[x].fields[y].type != "percentage") {
+						if ( $scope.table_data[x].fields[y].type == "reference" ) {
+							var refValue = "";
+							if ( typeof $scope.table_data[x].fields[y].value.value != "undefined") {
+								refValue = $scope.table_data[x].fields[y].value.value;
+							}
+							if ( refValue == "" && $scope.table_data[x].fields[y].mandatory ) {
+								bComplete = false;
+								break loop1;
+							}
+						} else {
+							if (  $scope.table_data[x].fields[y].type == "checkbox" ) {
+								var checkBoxHasValue = ($scope.table_data[x].fields[y].value == "true" || $scope.table_data[x].fields[y].value == "false");
+								if ( !checkBoxHasValue && $scope.table_data[x].fields[y].mandatory ) {
+									bComplete = false;
+									break loop1;
+								}
+							} else {
+								if ( $scope.table_data[x].fields[y].value == "" && $scope.table_data[x].fields[y].mandatory ) {
+									bComplete = false;
+									break loop1;
+								}
+							}
+						}
+					} else {
+						if ( $scope.table_data[x].fields[y].value == "" ) {
+							$scope.table_data[x].fields[y].value = 0;
+						}
+						if ( $scope.table_data[x].fields[y].value <= 0 && $scope.table_data[x].fields[y].mandatory ) {
+							bComplete = false;
+							break loop1;
+						}
+					}
+				}
+			}
+		}
+		
+		if ( bComplete ) {
+			var jsonOutput = angular.copy($scope.table_data);
+			$scope.table_inputs[$scope.data.json_variable] = JSON.stringify(jsonOutput);
+			var sHTML = "<h4>"+$scope.data.title+"</h4>";
+			sHTML += "<table class=\"table table-striped\"><tbody>";
+			/* Headers */
+			sHTML += "<tr>";
+			for ( var t=0; t<jsonOutput[0].fields.length; t++ ) {
+				if ( $scope.isVisibleColumn(t)) {
+					sHTML += "<th>"+jsonOutput[0].fields[t].label+"</th>";
+				}
+			}
+			sHTML += "</tr>";
+			/* Body Rows */
+			for ( var q=0; q<jsonOutput.length; q++ ) {
+				sHTML += "<tr>";
+				for ( var tt=0; tt<jsonOutput[q].fields.length; tt++ ) {
+					if ( $scope.isVisibleColumn(tt)) {
+						switch (jsonOutput[q].fields[tt].type) {
+							case "reference":
+								var tmpValue = "";
+								if ( typeof jsonOutput[q].fields[tt].value.displayValue != "undefined" ) {
+									tmpValue = jsonOutput[q].fields[tt].value.displayValue;
+								}
+								sHTML += "<td>"+tmpValue+"</td>";
+								break;
+							case "choice":
+								var choiceDisplayValue = jsonOutput[q].fields[tt].value;
+								for ( var cI=0; cI<jsonOutput[q].fields[tt].choices.length; cI++ ) {
+									if ( jsonOutput[q].fields[tt].choices[cI].value == choiceDisplayValue ) {
+										choiceDisplayValue = jsonOutput[q].fields[tt].choices[cI].label;
+										break;
+									}
+								}
+								sHTML += "<td>"+choiceDisplayValue+"</td>";
+								break;
+							case "checkbox":
+								var sCheckBoxDisplay = "Yes";
+								if ( jsonOutput[q].fields[tt].value == false ) {
+									sCheckBoxDisplay = "No";
+								}
+								sHTML += "<td>"+sCheckBoxDisplay+"</td>";
+								break;
+							default:
+								sHTML += "<td>"+jsonOutput[q].fields[tt].value+"</td>";
+								break;
+						}
+					}
+					
+				}
+				sHTML += "</tr>";
+			}
+			sHTML +="</tbody></table>";
+			$scope.table_inputs[$scope.data.html_variable] = sHTML;
+			if ( bMandatoryState ) {
+				$scope.setMandatoryState(false);
+			}
+		} else {
+			$scope.table_inputs[$scope.data.json_variable] = "";
+			$scope.table_inputs[$scope.data.html_variable] = "";
+			if ( !bMandatoryState && $scope.data.is_mandatory) {
+				$scope.setMandatoryState(true);
+			}
+		}
+	};
+	
+	$scope.setColumnDisplay = function(columnID, bMode) {
+		if ( typeof $scope.data.table_options.fields[columnID] != "undefined" ) {
+			$scope.data.table_options.fields[columnID].visible = bMode;
+		}
+	};
+	
+	$scope.isVisibleColumn = function(columnID) {
+		if ( typeof $scope.data.table_options.fields[columnID] != "undefined" ) {
+			return ($scope.data.table_options.fields[columnID].visible == true);
+		}
+		
+		return false;
+	};
+	
+	$scope.getColumnID = function(sColumnName) {
+		for (var i=0; i<$scope.data.table_options.fields.length; i++ ) {
+			if ( $scope.data.table_options.fields[i].name == sColumnName ) {
+				return i;
+			}
+		}
+		
+		return -1;
+	};
+	
+	$scope.setColumnValue = function( rowID, columnID, value ) {
+		if ( typeof $scope.table_data[rowID] != "undefined" ) {
+			if ( typeof $scope.table_data[rowID].fields[columnID] != "undefined" ) {
+				$scope.table_data[rowID].fields[columnID].value = value;
+			}
+		}
+	};
+	
+	$scope.runScript = function(scriptCode, locals) {
+		eval(scriptCode);
+	};
+	
+	$scope.runOnChange = function(column, rowID, columnID) {
+		//console.log('Triggered runOnChange for '+column.label+' rowID:'+rowID+' columnID:'+columnID+' data exists:'+(typeof $scope.data != "undefined")+' table_data exists:'+(typeof $scope.table_data != "undefined"));
+		if ( column.onChangeScript != "" ) {
+			var locals = {
+				column: column,
+				rowID: rowID,
+				columnID: columnID
+			};
+			//$scope.$eval(column.onChangeScript, locals);
+			$scope.runScript(column.onChangeScript, locals);
+		}
+	};
+	
+	$scope.parseReferenceQual = function(sRefQualVal, rowid, columnid) {
+		if ( sRefQualVal == "" ) {
+			return "";
+		}
+		
+		if ( sRefQualVal.indexOf("+") == -1 ) {
+			return sRefQualVal;
+		}
+		
+		$scope.rowid = rowid;
+		$scope.columnid = columnid;
+		
+		var parsedOutput = $scope.$eval(sRefQualVal);
+		//console.log('[parseReferenceQual] parsed output:'+parsedOutput);
+		
+		return parsedOutput;
+	};
+		
+	if ( $scope.data.columns_specified ) {
+		$scope.setupTableData();
+		if ( $scope.data.is_mandatory ) {
+			$scope.setMandatoryState(true);
+		}
+	} else {
+		if ( $scope.data.can_edit ) { $scope.goToEditMode(); }
+	}
+	
+	var mac = new spMacro($scope, $scope.table_inputs);
+	$scope.$watchCollection('table_inputs', function(newV, oldV) {
+		mac.onChange(newV, oldV);
+	});
+	
+	$scope.$watch('table_data', $scope.processTableDataChange, true);
+	
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>fieldset.edit_mode {&#13;
+  border-left:10px solid #dedede;&#13;
+  padding-left:10px;&#13;
+}&#13;
+.has-success .form-control-success {&#13;
+  background-image: url("JB_GreenTick.pngx");&#13;
+}&#13;
+&#13;
+.form-control-danger, .form-control-success, .form-control-warning {&#13;
+  padding-right: 2.25rem;&#13;
+  background-repeat: no-repeat;&#13;
+  background-position: center right .625rem;&#13;
+  -webkit-background-size: 1.25rem 1.25rem;&#13;
+  background-size: 1.25rem 1.25rem;&#13;
+}&#13;
+&#13;
+i.remove-row {&#13;
+  padding: 0px 5px 20px;&#13;
+  color: #a0303c;&#13;
+  cursor: pointer;&#13;
+}&#13;
+&#13;
+.b-n {&#13;
+  border:none;&#13;
+}&#13;
+&#13;
+button.remove-row-btn {&#13;
+  display:none;&#13;
+}&#13;
+&#13;
+.responsive td .form-group {&#13;
+  padding-left:5px;&#13;
+  padding-right:5px;&#13;
+}&#13;
+&#13;
+td.column-data {&#13;
+  vertical-align: top;&#13;
+}&#13;
+&#13;
+.form-control-success .select2-choice {&#13;
+  border-color:#5cb85c;&#13;
+}&#13;
+&#13;
+.responsive.large tbody,.responsive.large th,.responsive.large thead,.responsive.large tr{&#13;
+  display:block&#13;
+}&#13;
+.responsive.large th,.responsive.large thead tr{&#13;
+  position:absolute;&#13;
+  top:-9999px;&#13;
+  left:-9999px&#13;
+}&#13;
+.responsive.large tr{&#13;
+  border-top: 1px dashed #eee;&#13;
+  padding-top: 10px;&#13;
+  padding-bottom: 10px;&#13;
+  margin-top: 10px;&#13;
+}&#13;
+.responsive.large td:nth-child(even),.responsive.large td:nth-child(odd){&#13;
+  border:none;&#13;
+  border-bottom:1px solid #eee;&#13;
+  position:relative;&#13;
+  padding-left:50%;&#13;
+  white-space:normal;&#13;
+  text-align:left;&#13;
+  display:block;&#13;
+  -webkit-box-sizing:content-box;&#13;
+  -moz-box-sizing:content-box;&#13;
+  box-sizing:content-box;&#13;
+  min-height:1em&#13;
+}&#13;
+&#13;
+.responsive.large td:nth-child(even)::before,.responsive.large td:nth-child(odd)::before{&#13;
+  position:absolute;&#13;
+  left:6px;&#13;
+  width:45%;&#13;
+  padding-right:10px;&#13;
+  -ms-word-wrap:break-word;&#13;
+  word-wrap:break-word;&#13;
+  text-align:left;&#13;
+  font-weight:700;&#13;
+  content:attr(data-title)&#13;
+}&#13;
+&#13;
+.responsive.large .header-row {&#13;
+  border:none;&#13;
+  padding:0;&#13;
+  margin:0;&#13;
+}&#13;
+&#13;
+.responsive.large button.remove-row-btn {&#13;
+  display:block;&#13;
+  float:right;&#13;
+}&#13;
+&#13;
+@media only screen and (max-width: 800px) {&#13;
+  .responsive tr{margin-top: 5px;}&#13;
+  a.remove-row-link {display:none;}&#13;
+  button.remove-row-btn {display:block;}&#13;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description>Version 2.1 of table macro.  Utilizes table definition and column definition records for controlling display</description>
+        <docs/>
+        <field_list/>
+        <has_preview>false</has_preview>
+        <id/>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+        <name>Copy of JB Table Macro (v2)</name>
+        <option_schema/>
+        <public>false</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+	var tableUtil = new global.JBTableMacroHelper();
+	data.table_options = tableUtil.getDefaultOptions();
+	data.title = "";
+	data.is_mandatory = true;
+	var edit_parm = $sp.getParameter('edit');
+	data.is_cart_item = edit_parm == 'cart';
+	var cart_item_id = $sp.getParameter("sys_id");
+	
+	if ( options ) {
+		if ( typeof options.table_options != "undefined") {
+			data.table_options = options.table_options;
+		}
+		if ( typeof options.table_definition != "undefined") {
+			data.table_options = tableUtil.getTableOptions(options.table_definition, data.is_cart_item, cart_item_id);
+			if ( typeof data.table_options.title != "undefined" ) {
+				data.title = data.table_options.title;
+			}
+			if ( typeof data.table_options.is_mandatory != "undefined" ) {
+				data.is_mandatory = data.table_options.is_mandatory;
+			}
+			
+		}
+		if ( typeof options.title != "undefined") {
+			data.title = options.title;
+		}
+		if ( typeof options.is_mandatory != "undefined") {
+			data.is_mandatory = options.is_mandatory;
+		}
+	}
+	
+	var template_request = $sp.getParameter('requestid');
+	if ( template_request && template_request != "" ) {
+		var fRequestRec = new GlideRecord('sc_req_item');
+		fRequestRec.get(template_request);
+		if ( fRequestRec.isValidRecord() && typeof data.table_options.table_definition != "undefined") {
+			var fTableDef = new GlideRecord('u_table_variable');
+			fTableDef.get(data.table_options.table_definition);
+			if ( fTableDef.isValidRecord() ) {
+				data.table_options.default_data_json = tableUtil.getDefaultDataFromRequest(fRequestRec, fTableDef);
+				data.table_options.row_count = data.table_options.default_data_json.length;
+			}
+		}
+	}
+	
+	data.html_variable = tableUtil.HTML_VARIABLE;
+	data.json_variable = tableUtil.JSON_VARIABLE;
+	
+	data.columns_specified = (data.table_options.fields.length > 0);
+	data.can_edit = gs.hasRole('admin');
+
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-29 03:59:40</sys_created_on>
+        <sys_id>d31ccd0507123010e7b1f7208c1ed0c1</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Copy of JB Table Macro (v2)</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sp_widget_d31ccd0507123010e7b1f7208c1ed0c1</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-08-29 03:59:40</sys_updated_on>
+        <template><![CDATA[<!-- <textarea style="width:100%;height:200px;">{{data.table_options|json}}</textarea> -->
+<fieldset class="form-group form-group-has-focus" ng-class="{'edit_mode':edit_mode}">
+  
+  <label ng-if="data.title != ''" class="field-label" style="display:block;">
+    <span class="field-decorations">
+      <span ng-show="data.is_mandatory" style="padding-right: .25em" title="${Mandatory}" class="fa fa-asterisk mandatory" ng-class="{'mandatory-filled': mandatory_filled()}" aria-hidden="false"></span>
+    </span>
+    {{data.title}}
+    <a ng-if="data.can_edit" ng-hide="edit_mode" class="pull-right" href="javascript:void(0)" ng-click="goToEditMode()">
+      <i title="Edit Table" class="fa fa-pencil-square-o"></i>
+    </a>
+  </label>
+  
+  <div ng-if="edit_mode">
+    <div class="alert alert-warning" ng-if="!data.columns_specified">
+      No table definition provided, define your table information and then click Setup Data Table to start building the table definition record
+    </div>
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label" for="columnLength">Table Label</label>
+      <div class="col-sm-10">
+        <input class="form-control" ng-model="data.title" type="text" />
+      </div>
+    </div>
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label" for="columnLength">Number of Rows to Display</label>
+      <div class="col-sm-10">
+        <input class="form-control" ng-model="data.table_options.row_count" type="number" />
+      </div>
+    </div>
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label" for="columnLength">Max Number of Rows (set to -1 for infinite)</label>
+      <div class="col-sm-10">
+        <input class="form-control" ng-model="data.table_options.max_rows" type="number" />
+      </div>
+    </div>
+    <div class="form-group row">
+      <label class="col-sm-2 col-form-label" for="columnLength">Allow new Rows</label>
+      <div class="col-sm-10">
+        <input ng-model="data.table_options.allow_row_add" type="checkbox" />
+      </div>
+    </div>
+    
+    <button ng-if="temp_columns.length > 0" ng-disabled="data.title==''" ng-click="setupTable()" class="btn btn-primary">Setup Data Table</button>    
+    
+  </div>
+  
+  <div ng-if="!edit_mode && data.columns_specified">
+    <table wt-responsive-table ng-class="{'large':data.table_options.show_as_vtable}">
+        <tbody>
+        	<tr class="header-row">
+          	<th ng-repeat="tableHeader in data.table_options.fields|filter:{'visible':true}">
+            	{{tableHeader.label}}
+            	<span class="field-decorations">
+              	<span ng-show="tableHeader.mandatory" style="padding-left: .25em" title="${Mandatory}" class="fa fa-asterisk mandatory" aria-hidden="false"></span>
+            	</span>
+          	</th>
+        	</tr>
+        	<tr ng-repeat="(rowID,rowCounter) in table_data" id="tableRow_{{rowCounter.number}}">
+          	<td ng-repeat="(columnID,field) in rowCounter.fields" ng-if="isVisibleColumn(columnID)" class="column-data">
+            	<div class="form-group" ng-class="{'has-success' : field.value != ''}">
+              	<jb-tablevar-column field="field" data="data" c="c" table_data="table_data" rowid="rowID" columnid="columnID" run-on-change="runOnChange" parse-reference-qual="parseReferenceQual"></jb-tablevar-column>
+            	</div>
+          	</td>
+          	<td ng-if="$index > 0" ng-class="{'clearfix b-n m-t':data.table_options.show_as_vtable}">
+            	<a class="remove-row-link" href="javascript:void(0);" ng-click="deleteRow(rowID)" ng-if="!data.table_options.show_as_vtable">
+              	<i title="{{data.table_options.remove_row_title}}" class="fa fa-minus-circle fa-2x remove-row"></i>
+            	</a>
+            	<button class="remove-row-btn btn btn-danger" ng-click="deleteRow(rowID)">
+              	{{data.table_options.remove_row_title}}
+            	</button>
+          	</td>
+        	</tr>
+      	<tbody>
+    </table>
+    <div ng-if="((data.table_options.row_count < data.table_options.max_rows) || data.table_options.max_rows == -1) && data.table_options.allow_row_add">
+      <button ng-click="addRow()" class="btn btn-primary">{{data.table_options.add_row_title}}</button>
+    </div>
+    
+  </div>
+  
+</fieldset>]]></template>
+    </sp_widget>
+</record_update>

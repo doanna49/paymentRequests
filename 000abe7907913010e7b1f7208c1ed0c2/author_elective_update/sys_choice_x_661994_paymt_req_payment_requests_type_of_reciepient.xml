@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_choice action="INSERT_OR_UPDATE" field="type_of_reciepient" table="x_661994_paymt_req_payment_requests" version="3">
+        <sys_choice_set action="INSERT_OR_UPDATE">
+            <element>type_of_reciepient</element>
+            <name>x_661994_paymt_req_payment_requests</name>
+            <sys_class_name>sys_choice_set</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-22 02:49:21</sys_created_on>
+            <sys_id>f29f4d7407213010e7b1f7208c1ed008</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>type_of_reciepient</sys_name>
+            <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+            <sys_update_name>sys_choice_x_661994_paymt_req_payment_requests_type_of_reciepient</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-22 02:49:21</sys_updated_on>
+        </sys_choice_set>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_of_reciepient</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Students</label>
+            <language>en</language>
+            <name>x_661994_paymt_req_payment_requests</name>
+            <sequence>1</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-22 02:49:20</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>f68f45b407213010e7b1f7208c1ed0d4</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-22 02:49:30</sys_updated_on>
+            <value>1</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_of_reciepient</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Non-Paid LTU Staff including Conagoths, Adjunct, Emeritus Professors and Honorary staff</label>
+            <language>en</language>
+            <name>x_661994_paymt_req_payment_requests</name>
+            <sequence>2</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-22 02:49:55</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>369f413407213010e7b1f7208c1ed089</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-22 02:50:04</sys_updated_on>
+            <value>2</value>
+        </sys_choice>
+        <sys_choice action="INSERT_OR_UPDATE">
+            <dependent_value/>
+            <element>type_of_reciepient</element>
+            <hint/>
+            <inactive>false</inactive>
+            <label>Staff: awards and prizes only (area to submit on behalf</label>
+            <language>en</language>
+            <name>x_661994_paymt_req_payment_requests</name>
+            <sequence>3</sequence>
+            <synonyms/>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-22 02:50:25</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>57bfc17407213010e7b1f7208c1ed05a</sys_id>
+            <sys_mod_count>2</sys_mod_count>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-22 02:50:34</sys_updated_on>
+            <value>3</value>
+        </sys_choice>
+    </sys_choice>
+</record_update>

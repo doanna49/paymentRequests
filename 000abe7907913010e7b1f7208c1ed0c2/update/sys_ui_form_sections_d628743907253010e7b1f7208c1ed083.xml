@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_form_sections form_id="d628743907253010e7b1f7208c1ed083" sys_domain="global" table="csm_order_case" version="3">
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>0</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-25 03:40:51</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>ae28743907253010e7b1f7208c1ed099</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="csm_order_case" name="csm_order_case" sys_domain="global" view="Default view">d628743907253010e7b1f7208c1ed083</sys_ui_form>
+            <sys_ui_section caption="NULL" display_value="" name="csm_order_case" sys_domain="global" view="Default view">e628743907253010e7b1f7208c1ed093</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-25 03:40:51</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>1</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-25 03:40:50</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>a228743907253010e7b1f7208c1ed08f</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="csm_order_case" name="csm_order_case" sys_domain="global" view="Default view">d628743907253010e7b1f7208c1ed083</sys_ui_form>
+            <sys_ui_section caption="Notes" display_value="Notes" name="csm_order_case" sys_domain="global" view="Default view">5228743907253010e7b1f7208c1ed08b</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-25 03:40:50</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>2</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-25 03:40:50</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>e228743907253010e7b1f7208c1ed093</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="csm_order_case" name="csm_order_case" sys_domain="global" view="Default view">d628743907253010e7b1f7208c1ed083</sys_ui_form>
+            <sys_ui_section caption="Related Records" display_value="Related Records" name="csm_order_case" sys_domain="global" view="Default view">a628743907253010e7b1f7208c1ed08f</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-25 03:40:50</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form_section action="INSERT_OR_UPDATE">
+            <position>3</position>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-25 03:40:50</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>1a28743907253010e7b1f7208c1ed08a</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_overrides/>
+            <sys_ui_form display_value="csm_order_case" name="csm_order_case" sys_domain="global" view="Default view">d628743907253010e7b1f7208c1ed083</sys_ui_form>
+            <sys_ui_section caption="Closure Information" display_value="Closure Information" name="csm_order_case" sys_domain="global" view="Default view">5e28743907253010e7b1f7208c1ed085</sys_ui_section>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-25 03:40:50</sys_updated_on>
+        </sys_ui_form_section>
+        <sys_ui_form action="INSERT_OR_UPDATE">
+            <name>csm_order_case</name>
+            <roles/>
+            <sys_class_name>sys_ui_form</sys_class_name>
+            <sys_created_by>admin</sys_created_by>
+            <sys_created_on>2021-07-25 03:40:50</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>d628743907253010e7b1f7208c1ed083</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>csm_order_case</sys_name>
+            <sys_overrides/>
+            <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+            <sys_update_name>sys_ui_form_sections_d628743907253010e7b1f7208c1ed083</sys_update_name>
+            <sys_updated_by>admin</sys_updated_by>
+            <sys_updated_on>2021-07-25 03:40:50</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_form>
+    </sys_ui_form_sections>
+</record_update>

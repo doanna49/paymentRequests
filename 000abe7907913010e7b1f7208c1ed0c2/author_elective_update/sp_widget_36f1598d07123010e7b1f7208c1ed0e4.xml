@@ -1,0 +1,4221 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="DELETE">
+        <category>sc</category>
+        <client_script><![CDATA[function ($scope, $http, nowServer, $timeout, spUtil, spScUtil, spModal, spAttachmentUpload, i18n, $window, $location, spAriaUtil, nowAttachmentHandler, $log, $sce, $q, spAtf, spSCNavStateManager, cabrillo) {
+	var c = this;
+	$scope.guide_step = 0;
+	$scope.m = $scope.data.msgs;
+	$scope.evaluatingIncludes = false;
+	$scope.data.isMEE = cabrillo.isNative() && $scope.options.native_mobile == 'true';
+	$scope.isItemOpened = false;
+    $scope.setDefaultValue = true;
+	includedGformInstances = {};
+	var webAnalyticsMsgSuffix =  $scope.data.isMEE ? " -NOW Mobile" : "";
+	$rootScope.$on('spModel.gForm.rendered', function() {
+		if ($scope.guide_step === 0) {
+			addCabrilloBottomButtons({
+				title: [$scope.data.msgs.nextMsg],
+				fn: [$scope.goNext]
+			});
+		}
+		$timeout(function() {
+			spAtf.init().then(function(atf) {
+				$scope._atf = atf;
+				atf.expose('catalog_util', catalogUtil);
+			});
+		}, 10);
+	});
+	if ($scope.options.isServiceWorkspace && $window.frameElement) {
+		var workspaceParams = {};
+		workspaceParams.sysparm_parent_table = $window.frameElement.getAttribute('parent-table') || $window.frameElement.parentTable;
+		workspaceParams.sysparm_parent_sys_id = $window.frameElement.getAttribute('parent-sys-id') || $window.frameElement.parentSysId;
+		$scope.data.workspaceParams = workspaceParams;
+	}
+	if ($scope.data.sc_cat_item) {
+		$scope.data.sc_cat_item.trusted_description = $sce.trustAsHtml($scope.data.sc_cat_item.description);
+		if ($scope.data.sc_cat_item.request_method == "request")
+			$scope.submitButtonMsg = $scope.m.requestMsg;
+		else if ($scope.data.sc_cat_item.request_method == "submit")
+			$scope.submitButtonMsg = $scope.m.submitMsg;
+		else
+			$scope.submitButtonMsg = $scope.m.orderNowMsg;
+		// Breadcrumbs
+		if (!$scope.data.categories)
+			$scope.data.categories = [];
+		$scope.data.categories.forEach(function(category, index, categories){
+			categories[index].url = category.url + '&catalog_id=' + $scope.data.catalog_id;
+		});
+		if ($scope.data.categories.length > 0) {
+            $scope.data.categories.unshift({
+                label: $scope.data.sc_catalog || $scope.page.title,
+                url: '?id=' + $scope.data.sc_category_page
+            });
+            $scope.data.categories.push({
+                label: $scope.data.sc_cat_item.name,
+                url: '#'
+            });
+			if ($scope.data.all_catalog_msg) {
+                $scope.data.categories.unshift({
+                    label: $scope.data.all_catalog_msg,
+                    url: '?id=' + $scope.data.sc_category_page + "&catalog_id=-1"
+                });
+		}
+        } else {
+            $scope.data.categories.push({
+                label: $scope.data.sc_cat_item.name,
+                url: '#'
+            });
+		}
+		$timeout(function() {
+			$scope.$emit('sp.update.breadcrumbs', $scope.data.categories);
+		});
+		spUtil.setSearchPage('sc');
+	} else {
+        var notFoundBC = [{
+            label: $scope.page.title,
+            url: '?id=' + $scope.data.sc_catalog_page
+        }];
+		$timeout(function() {
+			$scope.$emit('sp.update.breadcrumbs', notFoundBC);
+		});
+		spUtil.setSearchPage('sc');
+	}
+
+	function isValidItemGform(g_form) {
+		if (g_form.getSysId() === $scope.data.sc_cat_item.sys_id)
+			return true;
+		if ($scope.includedItems)
+			for (var i in $scope.includedItems)
+				if ($scope.includedItems[i].sys_id === g_form.getSysId())
+					return true;
+		return false;
+	}
+
+    function setValueInNextDigestCycle(g_form, value, displayValue) {
+        $timeout(function() {
+		    g_form.setValue($scope.data.sc_cat_item.requested_for_variable_name, value, displayValue);
+        });
+	}
+
+	$scope.$on('spModel.gForm.initialized', function(e, gFormInstance) {
+		if (!isValidItemGform(gFormInstance))
+			return;
+		includedGformInstances[gFormInstance.getSysId()] = gFormInstance;
+		spSCNavStateManager.register(gFormInstance);
+		spSCNavStateManager.isNative($scope.data.isMEE);
+        var g_form = includedGformInstances[$scope.data.sc_cat_item.sys_id];
+        if ($scope.setDefaultValue && g_form && c.options.requested_for_id && c.options.requested_for_display) {
+            $scope.data.requested_for = {
+                id: c.options.requested_for_id,
+                display_value: c.options.requested_for_display
+            };
+            if ($scope.data.sc_cat_item.requested_for_variable_name) {
+                $scope.setDefaultValue = false;
+                setValueInNextDigestCycle(g_form, c.options.requested_for_id, c.options.requested_for_display);
+            }
+        } else if ($scope.setDefaultValue && $scope.data.workspaceParams && $scope.data.workspaceParams.sysparm_parent_table && $scope.data.workspaceParams.sysparm_parent_sys_id) {
+			$scope.server.get({
+				action: 'get_requested_for',
+				parentParams : $scope.data.workspaceParams
+			}).then(function(response) {
+					if (response.data.requested_for && g_form) {
+                    $scope.setDefaultValue = false;
+						$scope.data.requested_for = response.data.requested_for;
+                    setValueInNextDigestCycle(g_form, response.data.requested_for.id, response.data.requested_for.displayValue);
+					}
+			});
+		}
+		gFormInstance.$private.events.on('submitted', function(event) {
+			gFormInstance.$private.processed = true;
+			if (gFormInstance.getSysId() == $scope.data.sc_cat_item.sys_id) {
+                $scope.$broadcast('$sp.service_catalog.form_submitted', {
+                    action_name: 'submit'
+                });
+				$scope.guide_step = 1;
+				evalIncludes();
+				spSCNavStateManager.unregisterForms(Object.keys(includedGformInstances));
+				$scope.itemShown = 0;
+            } else
+				processChooseOptions();
+		});
+		if ($scope.data.isMEE) {
+			cabrillo.viewLayout.showSpinner();
+			cabrillo.viewLayout.setTitle($scope.data.sc_cat_item.name);
+			$rootScope.$on('spModel.gForm.showNativeMobileButtons', function() {
+				cabrillo.viewLayout.setTitle($scope.data.sc_cat_item.name);
+				showCabrilloBottomButtons();
+			});
+		}
+		// Set Title in Workspace
+		else if ($scope.options.isServiceWorkspace)
+			$window.postMessage({
+				msg:'CATALOG_ITEM_SET_TITLE',
+				title: $scope.data.sc_cat_item.name
+			}, $location.origin);
+
+		$timeout(function() {
+			$rootScope.$emit('spModel.gForm.rendered');
+			hideSpinner();
+		}, 175);
+	});
+    $rootScope.$on('spModel.gForm.rendered', function() {
+        if ($scope.guide_step == 0)
+            spAriaUtil.sendLiveMessage($scope.m.openedOrderGuideMsg);	
+        else if ($scope.guide_step == 1)
+            sendMessageAfterAllItemsAreLoaded();
+    });
+	$scope.$on('spModel.gForm.destroyed', function(e, sys_id){
+		delete includedGformInstances[sys_id];
+	});
+    var validationComplete = $rootScope.$on('$sp.service_catalog.form_validation_complete', function() {
+        $scope.validating = false;
+    });
+	/*************************************************************************************************/
+	/********************************       Guide Navigation Start     *******************************/
+	/*****#####################################################################################********/
+	$scope.goPrev = function() {
+		if ($scope.submitted)
+			return;
+		clearCabrilloBottomButtons();
+		$scope.includedItems.forEach(function (item) {
+			item.isOpen = false;
+		})
+		$scope.guide_step--;
+		if($scope.guide_step==0)
+			spSCNavStateManager.unregisterForms(Object.keys(includedGformInstances));
+		if ($scope.guide_step === 1) {
+			addCabrilloBottomButtons({
+				title: [$scope.data.msgs.prevMsg, $scope.data.msgs.nextMsg],
+				fn: [$scope.goPrev, $scope.goNext]
+			});
+		}
+	}
+	$scope.goNext = function(timeout) {
+		var gForm;
+		if($scope.guide_step == 0) {
+			$scope.$evalAsync(function () {
+				gForm = includedGformInstances[$scope.data.sys_id];
+				if (!spScUtil.isServerValidationDone($scope.data.sc_cat_item._fields))
+					$scope.validating = true;
+				else if (gForm && !gForm.submit()) {
+					timeout = timeout || 2000;
+					if ($scope.data.isMEE)
+						openItemWithInvalidFields();
+					$timeout(function () {
+                        $scope.$broadcast('$sp.service_catalog.form_submit_failed', {
+                            action_name: 'submit'
+                        });
+					}, timeout);
+				}
+			});
+        } else if ($scope.guide_step == 1) {
+			$scope.itemsIncluded = $scope.includedItems.length;
+			$scope.includedItemsCounter = 0;
+			$scope.includedItems.forEach(function(item) {includedGformInstances[item.sys_id].$private.processed = false;});
+			$scope.$evalAsync(function () {
+				for (var i = 0; i < $scope.includedItems.length; i++) {
+					if ($scope.includedItems[i].included) {
+						$scope.includedItemsCounter++;
+						var g_form = includedGformInstances[$scope.includedItems[i].sys_id];
+						g_form.$private.processed = false;
+						if (!spScUtil.isServerValidationDone($scope.includedItems[i]._fields))
+							$scope.validating = true;
+						else if (g_form && !g_form.submit()) {
+							timeout = timeout || 1000;
+							$timeout(function (itemCounter) {
+								$scope.$broadcast('$sp.service_catalog.form_submit_failed', {
+                                    action_name: 'submit'
+                                });
+								openItemWithInvalidFields(itemCounter);
+							}.bind(null, $scope.includedItemsCounter), timeout); 
+						}
+          } else
+							$scope.itemsIncluded--;
+				}
+			});
+		}
+	}
+	$scope.toggleItemState = function(item) {
+		if (item.included) {
+			$scope.totalIncluded--;
+			angular.element('#item_details_' + item.sys_id).find('a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]').attr('tabindex', -1);
+        } else {
+			$scope.totalIncluded++;
+			angular.element('#item_details_' + item.sys_id).find('a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]').removeAttr('tabindex');
+		}
+		$scope.requested_for_variable_count += getRequestedForVariableCountDiff(item);
+	}
+
+	function getRequestedForVariableCountDiff(item) {
+		if (!item.has_requested_for_variable)
+			return 0;
+		return item.included ? -1 : 1;
+	}
+
+	function processChooseOptions() {
+		var canSubmit = true;
+		for (var i = 0; i < $scope.includedItems.length; i++) {
+			if ($scope.includedItems[i].included) {
+				var gForm = includedGformInstances[$scope.includedItems[i].sys_id];
+				if (gForm && !gForm.$private.processed) {
+					canSubmit = false;
+					break;
+				}
+			}
+		}
+		if(canSubmit) {
+			evalGuidePrice();
+			spSCNavStateManager.unregisterForms(Object.keys(includedGformInstances));
+            $scope.$broadcast('$sp.service_catalog.form_submitted', {
+                action_name: 'submit'
+            });
+			$scope.guide_step = 2;
+			$scope.showAddToCart = $scope.options.show_add_cart_button == 'true' && !$scope.data.sc_cat_item.no_cart;
+			addCabrilloBottomButtons({
+				title: [i18n.getMessage('Add to Cart'), $scope.submitButtonMsg],
+				fn: [$scope.triggerAddToCart, $scope.triggerSubmit]
+			});
+		}
+	}
+
+    var sendMessageAfterAllItemsAreLoaded = (function() {
+        var formsIncluded = 0;
+        return function() {
+            formsIncluded++;
+            if (formsIncluded == $scope.includedItems.length) {
+               spAriaUtil.sendLiveMessage($scope.m.chooseOptionsOpenedMsg);
+               formsIncluded = 0;
+           }
+        }
+    })();
+	
+	var openItemWithInvalidFields = function(itemCounter) {
+			if (itemCounter == $scope.itemsIncluded) {			
+				var someFormIsInvalid = false;
+				for (var i=0; i < $scope.includedItems.length; i++) {
+					if ($scope.includedItems[i].included) {
+						var gForm = includedGformInstances[$scope.includedItems[i].sys_id];
+						if (!gForm)
+							return;
+						var fields = gForm.getFieldNames();
+						for (var j=0; j<fields.length; j++) {
+							var field = gForm.getField(fields[j]);
+							if (field.isInvalid) {
+								if ($scope.data.isMEE) {
+									$rootScope.$broadcast('spModel.view.render', $scope.includedItems[i].sys_id, function(){$timeout(function(){gForm.submit()})});
+									$scope.includedItems[i].isOpen = true;
+									$scope.showCancel($scope.includedItems[i].sys_id);
+                                } else
+									$scope.includedItems[i].isOpen = true;
+								someFormIsInvalid = true;
+								break;
+							}					
+						}
+						if ($scope.data.isMEE && someFormIsInvalid)
+							break;
+					}
+				}
+				if (!$scope.data.isMEE)
+					focusInvalidField();	
+			}
+		}
+	
+	function focusInvalidField(){     
+		$timeout(function() {
+			for (var i = 0; i < $scope.includedItems.length; i++) {
+				if ($scope.includedItems[i].included) {
+					var mandatory = $scope.includedItems[i]._mandatory;
+					if (mandatory && mandatory.length > 0) {
+						var elems = angular.element("[name*='" + mandatory[0].name + "']");
+						if (elems && elems.length > 0) //set focus the first element
+							elems[0].focus();
+						break;
+					} else {
+						var gForm = includedGformInstances[$scope.includedItems[i].sys_id];
+						getInvalidFields(gForm);
+						var invalidFields = gForm._invalidFields;
+						if (invalidFields && invalidFields.length > 0) {
+							var invalid = angular.element("[name*='" + invalidFields[0].name + "']");
+							if (invalid && invalid.length > 0) //set focus the first element
+								invalid[0].focus();
+							break;
+						}
+					}
+				}
+			}
+		}, 500);
+	}
+	$scope.closeItemAccordion = function (itemOpened) {
+		itemOpened.isOpen = false;
+		cabrillo.viewLayout.setNavigationBarButtons();
+		cabrillo.viewLayout.setTitle($scope.data.sc_cat_item.name);
+		addCabrilloBottomButtons({
+			title: [$scope.data.msgs.prevMsg, $scope.data.msgs.nextMsg],
+			fn: [$scope.goPrev, $scope.goNext]
+		});
+		$scope.isItemOpened = false;
+	}
+	$scope.showItem = function(index) {
+		if($scope.itemShown == index)
+			$scope.itemShown = -1;
+		else
+			$scope.itemShown = index;
+	}
+	$scope.showCancel = function(id) {
+		var itemOpened, buttons;
+		if ($scope.data.isMEE) {
+			clearCabrilloBottomButtons();
+			cabrillo.viewLayout.setNavigationBarButtons();
+			cabrillo.viewLayout.hideBackButton();
+			itemOpened = $scope.includedItems.find(function (item) {
+				return item.sys_id === id;
+			});
+			cabrillo.viewLayout.setTitle(itemOpened.name);
+            buttons = [{
+					title: i18n.getMessage('Done'),
+					enabled: true
+            }];
+			cabrillo.viewLayout.setNavigationBarButtons(buttons, function(index) {
+				$scope.closeItemAccordion(itemOpened);
+			});
+		}
+		$scope.isItemOpened = true;
+	}
+	/********************************************************************************************/
+	/********************************     Guide Navigation End    *******************************/
+	/*****###############################################################################********/
+	/********************************************************************************************/
+	/********************************         Attachments         *******************************/
+	/*****###############################################################################********/
+	function initAttachmentHandlers() {
+		var setAttachments;
+		var appendError = function (error) {
+			spUtil.addErrorMessage(error.msg + error.fileName);
+		};
+		for (var i = 0; i < $scope.includedItems.length; i++) {
+			$scope.includedItems[i].attachmentHandler = new nowAttachmentHandler(setAttachments, appendError);
+			$scope.includedItems[i].attachmentHandler.setParams($scope.includedItems[i].targetTable, $scope.includedItems[i].sysparm_item_guid, 1024 * 1024 * $scope.data.maxAttachmentSize);
+		}
+	}
+	
+	$scope.uploadAttachments = function(item, files) {
+		spAttachmentUpload.uploadAttachments(item.attachmentHandler, files);
+	};
+	
+	$scope.$on('dialog.upload_too_large.show', function(e){
+		$log.error($scope.m.largeAttachmentMsg);
+		spUtil.addErrorMessage($scope.m.largeAttachmentMsg);
+	});
+	$scope.initAttachmentCallbacks = function (itemIndex) {
+		$scope.includedItems[itemIndex].attachmentHandler.setAttachments = function (attachments, action) {
+			$scope.includedItems[itemIndex].attachments = attachments;
+			if (action === "added") {
+				$scope.includedItems[itemIndex].attachment_submitted = true;
+			}
+			if (action === "renamed")
+				spAriaUtil.sendLiveMessage($scope.m.renameSuccessMsg);
+			if (action === "deleted") {
+				spAriaUtil.sendLiveMessage($scope.m.deleteSuccessMsg);
+				if ($scope.includedItems[itemIndex].attachments.length == 0)
+					$scope.includedItems[itemIndex].attachment_submitted = false;
+			}
+			$scope.includedItems[itemIndex].attachment_action_in_progress = false;
+            spUtil.get($scope, {
+                action: "from_attachment"
+            });
+		};
+		$scope.includedItems[itemIndex].confirmDeleteAttachment = function(attachment) {
+			spModal.confirm($scope.data.msgs.delete_attachment).then(function() {
+				$scope.includedItems[itemIndex].attachmentHandler.deleteAttachment(attachment);
+				$scope.includedItems[itemIndex].attachment_action_in_progress = true;
+				$scope.setFocusToAttachmentButton();
+			});
+		}
+	}
+	/********************************************************************************************/
+	/********************************       Attachments  End      *******************************/
+	/*****###############################################################################********/
+	/********************************************************************************************/
+	/********************************        UTIL Functions       *******************************/
+	/*****###############################################################################********/
+	function evalGuidePrice() {
+		$scope.price = 0;
+		var frequencyMap = {};
+		for (var i = 0; i < $scope.includedItems.length; i++) {
+			if ($scope.includedItems[i].included && $scope.includedItems[i].process_price) { 
+				var qty = parseInt($scope.includedItems[i].quantity);
+				var pricing = $scope.includedItems[i]._pricing;
+				var effectivePrice = 0;
+				var effectiveRecurringPrice = 0;
+				if (typeof $scope.includedItems[i].price != "undefined") {
+					effectivePrice = $scope.includedItems[i].price;
+				}
+				if (typeof $scope.includedItems[i].recurring_price != "undefined") {
+					effectiveRecurringPrice = $scope.includedItems[i].recurring_price;
+				}
+				if (effectiveRecurringPrice >= 0 && pricing.rfd) {
+					if(frequencyMap[pricing.rfd])
+						frequencyMap[pricing.rfd] += effectiveRecurringPrice * qty;
+					else
+						frequencyMap[pricing.rfd] = effectiveRecurringPrice * qty;
+				}
+				if (effectivePrice >= 0)
+					$scope.price += effectivePrice * qty;
+			}
+		}
+		frequencyMap.price = $scope.price;
+		$scope.server.get({
+			action: "format_prices",
+			prices: frequencyMap
+		}).then(function(response) {
+			$scope.frequencySequence = response.data.frequencySequence;
+			$scope.price_display = response.data.frequencyMap.price;
+			$scope.frequencyMap = response.data.frequencyMap;
+		});
+	}
+	
+	function evalIncludes() {
+		// don't allow submit while waiting on included items eval
+		$scope.evaluatingIncludes = true;
+		$scope.includedItems = [];
+		var guideData = getFieldsData($scope.data.sc_cat_item);
+		guideData.sysparm_id = $scope.data.sys_id;
+		guideData.without_cart = true;
+		guideData._fields = $scope.data.sc_cat_item._fields;
+		guideData.cascade = $scope.data.sc_cat_item.cascade;
+		guideData.has_requested_for_variable = $scope.data.sc_cat_item.has_requested_for_variable;
+		if ($scope.data.workspaceParams) {
+			guideData.sysparm_parent_sys_id = $scope.data.workspaceParams.sysparm_parent_sys_id;
+			guideData.sysparm_parent_table = $scope.data.workspaceParams.sysparm_parent_table;
+		}
+		$scope.server.get({
+			action: "init_guide",
+            	orderGuideData: guideData,
+		options: c.options
+		}).then(function(response) {
+			if (response.data.error) {
+				$scope.guide_step--;
+				return;
+			}
+            var itemGlobalData = response.data.itemGlobalData;
+            var includedItems = itemGlobalData.items;
+            var massageItemWithGlobalDataFn = getDataTransferFunction(itemGlobalData);
+            includedItems.forEach(function(item) {
+				item.trusted_description = $sce.trustAsHtml(item.description);
+                massageItemWithGlobalDataFn(item);
+				var _val = false;
+				Object.defineProperty(item, 'isOpen', {
+                    get: function() {
+                        return _val;
+                    },
+					set: function(val) {
+						_val = val;
+						if (val)
+							$rootScope.$broadcast('spModel.view.render', item.sys_id);
+					}
+				});
+			});
+            $scope.includedItems = includedItems;
+            $scope.requested_for_variable_count = response.data.requested_for_variable_count;
+            $scope.showIncludeToggle = response.data.showIncludeToggle;
+            initAttachmentHandlers();
+			$scope.totalIncluded = $scope.includedItems.length;
+			$scope.conflictingCartDomainMsg = response.data.conflictingCartDomainMsg;
+			$scope.evaluatingIncludes = false;
+			$scope.guide_requested_for = response.data.guide_requested_for;
+			addCabrilloBottomButtons({
+				title: [$scope.data.msgs.prevMsg, $scope.data.msgs.nextMsg],
+				fn: [$scope.goPrev, $scope.goNext]
+			});
+		});
+	}
+	
+    function getDataTransferFunction(itemGlobalData) {
+        return (function(item) {
+            //populate ui policies
+            item.policy = getObjectsArrayFromIdArray(item.policy, itemGlobalData.ui_policies) || [];
+            //populate ui scripts
+            item.ui_scripts = itemGlobalData.ui_scripts || [];
+            //populate client scripts
+            if (item.client_script) {
+                item.client_script.onLoad = getObjectsArrayFromIdArray(item.client_script.onLoad, itemGlobalData.client_scripts) || [];
+                item.client_script.onChange = getObjectsArrayFromIdArray(item.client_script.onChange, itemGlobalData.client_scripts) || [];
+                item.client_script.onSubmit = getObjectsArrayFromIdArray(item.client_script.onSubmit, itemGlobalData.client_scripts) || [];
+            }
+        });
+    }
+
+    function getObjectsArrayFromIdArray(idArray, globalObjectHolder) {
+        var objectsArray = [];
+        for (var i in idArray)
+            objectsArray.push(globalObjectHolder[idArray[i]]);
+        return objectsArray;
+    }
+
+	function getInvalidFields(gForm) {
+		gForm._invalidFields = [];
+		var fields = gForm.getFieldNames();
+		for (var j = 0; j < fields.length; j++) {
+			var field = gForm.getField(fields[j]);
+			if (field.isInvalid)
+				gForm._invalidFields.push(field);
+		}
+	}	
+	
+	function getCurrentGForm() {
+		if ($scope.guide_step == 0)
+			return includedGformInstances[$scope.data.sc_cat_item.sys_id];
+		else {
+			var openItem = $scope.includedItems.find(function(item){
+				return item.isOpen === true;
+			});
+			return includedGformInstances[openItem.sys_id];
+		}
+	}
+	
+	function openItemHelper(item, state, defer) {
+		for (var i = 0; i < $scope.includedItems.length; i++)
+			if ($scope.includedItems[i].sys_id == item) {
+				$scope.includedItems[i].included = state == 'true';
+				$scope.includedItems[i].isOpen = true;
+				$scope._atf.expose('g_form', spAtf.augmentForm(includedGformInstances[item]));
+				defer.resolve();
+			}
+	}
+
+	function getFieldsData(item) {
+        var fieldData = {
+            "variables": {}
+        };
+		for(var field in item._fields) {
+			var fieldValue = "";
+			if (item._fields[field].value != null && typeof item._fields[field].value != "string")
+				fieldValue = JSON.stringify(item._fields[field].value);
+			else
+				fieldValue = item._fields[field].value;
+			fieldData.variables[item._fields[field].name] = fieldValue;
+		}
+		return fieldData;
+	}
+
+	function getGuideItems(cartname) {
+		var items = [];
+		var item;
+		for(var i = 0; i < $scope.includedItems.length; i++) {
+			if($scope.includedItems[i].included) {
+				item = getFieldsData($scope.includedItems[i]);
+				item.sysparm_id = item.sysparm_active = $scope.includedItems[i].sys_id;
+				item.sysparm_quantity = $scope.includedItems[i].quantity;
+				item.sysparm_cart_name = cartname;
+				item.sysparm_item_guid = $scope.includedItems[i].sysparm_item_guid;
+				items.push(item);
+			}
+		}
+		return items;
+	}
+	/*********************************************************************************************/
+	/********************************          UTIL Functions End           **********************/
+	/*****################################################################################********/
+	/*********************************************************************************************/
+	/********************************           Submit Handlers             **********************/
+	/*****################################################################################********/
+	$scope.triggerAddToCart = function() {
+		var webAnalyticsMsgSuffix = $scope.data.isMEE ? " - NOW Mobile" : "";
+		clearCabrilloBottomButtons();
+		if($scope.conflictingCartDomainMsg) {
+			spUtil.addErrorMessage($scope.conflictingCartDomainMsg);
+			return;
+		}
+		if($scope.submitted)
+			return;
+		$scope.server.get({
+			action: 'log_request_cart',
+            itemDetails: {
+                sys_id: $scope.data.sc_cat_item.sys_id,
+										name: $scope.data.sc_cat_item.name,
+                sys_class_name: $scope.data.sc_cat_item.sys_class_name
+            }
+		});
+		$scope.submitted = true;
+		$scope.server.get({
+			action: "add_to_cart",
+			items: getGuideItems(""),
+			sys_id: $scope.data.sys_id,
+			guide_requested_for: $scope.guide_requested_for
+		}).then(function(response) {
+			$rootScope.$broadcast("$sp.service_catalog.cart.add_item");
+			$rootScope.$broadcast("$sp.service_catalog.cart.update");
+			$scope.$emit("$sp.sc_order_guide.add_to_cart");
+			window.GlideWebAnalytics.trackEvent('Service Catalog', 'Catalog Cart' + webAnalyticsMsgSuffix, 'Order Guide Added to Cart', 0, 0);
+			if ($scope.data.isMEE) {
+				$scope.submitted = true;
+				cabrillo.message.showMessage(cabrillo.message.SUCCESS_MESSAGE_STYLE, i18n.getMessage('Items have been added successfully to your cart'));
+				$timeout(function () {
+					cabrillo.flowControl.flowEnded();
+					return;
+				}, 200);
+				return;
+			}
+			spModal.open({
+				message: i18n.getMessage('Items have been added successfully'),
+				size: 'sm',
+				backdrop: 'static',
+				keyboard: false,
+				noDismiss: true,
+                buttons: [{
+                        label: i18n.getMessage('Catalog Home'),
+                        cancel: true
+                    },
+                    {
+                        label: i18n.getMessage('View Cart'),
+                        primary: true
+                    }
+				]
+			}).then(function() {
+				$location.search("id=sc_cart");
+			}, function() {
+				$location.search("id=sc_home");
+			});
+		}, function(error) {
+				spUtil.addErrorMessage(error);
+				return;
+		});
+	}
+	// order / create request
+	$scope.triggerSubmit = function() {
+		clearCabrilloBottomButtons();
+		if ($scope.submitted)
+			return;
+		$scope.submitted = true;
+		var hasItems = $scope.includedItems.filter(function(item) {
+			return item.sys_class_name != 'sc_cat_item_producer';
+		}).length > 0;
+		$scope.showOrderConfirmation = showOrderConfirmation();
+		if ($scope.showOrderConfirmation) {
+			var requested_for_id = "";
+			var requested_for_display = "";
+			if ($scope.data.requested_for && $scope.data.requested_for.id && $scope.data.requested_for.displayValue) {
+				requested_for_id = $scope.data.requested_for.id;
+				requested_for_display = $scope.data.requested_for.displayValue;
+			}
+			//Required to pass as payload for usage as embeddedWidget
+			var embeddedWidgetOptions = {
+				"auto_redirect" : "true",
+				"requested_for_id" : requested_for_id,
+				"requested_for_display" : requested_for_display
+			};
+			var payload = {
+				cart: '' + $scope.data.sys_id,
+				itemDetails: {
+					items: getGuideItems('' + $scope.data.sys_id),
+					request_method: $scope.data.sc_cat_item.request_method,
+					sys_id: $scope.data.sc_cat_item.sys_id, 
+					name: $scope.data.sc_cat_item.name,
+					sys_class_name: $scope.data.sc_cat_item.sys_class_name
+				},
+				workspaceParams: $scope.data.workspaceParams,
+				action: "order_guide"
+			};
+			for (var embeddedOption in embeddedWidgetOptions) {
+				payload[embeddedOption] = c.options[embeddedOption] || embeddedWidgetOptions[embeddedOption];
+			}
+			$scope.server.get(payload).then(function(response) {
+				var orderGuideModalCtrl;
+				var unregister = $scope.$on('$sp.service_catalog.cart.cancel_order', function(){
+					orderGuideModalCtrl.close();
+					$scope.submitted = false;
+					$timeout(function () {
+						addCabrilloBottomButtons({
+							title: [i18n.getMessage('Add to Cart'), $scope.submitButtonMsg],
+							fn: [$scope.triggerAddToCart, $scope.triggerSubmit]
+						});
+					});
+				});
+				var closeModalOnSubmit = $scope.$on("$sp.service_catalog.cart.submitted", function () {
+					orderGuideModalCtrl.close();
+					$scope.submitted = true;
+				});
+				var orderGuideModal = angular.copy(response.data.orderGuideModal);
+				orderGuideModal.options.afterOpen = function(ctrl){
+					orderGuideModalCtrl = ctrl;
+				};
+				orderGuideModal.options.afterClose = function() {
+					unregister();
+					closeModalOnSubmit();
+					$scope.orderGuideModal = null;
+					orderGuideModalCtrl = null;
+				};
+				$scope.orderGuideModal = orderGuideModal;
+			});
+			return $scope.submitted;
+		} else {
+			if ($scope.data.isMEE)
+				cabrillo.viewLayout.showSpinner();
+			$scope.data.action = 'checkout_guide';
+			$scope.data.guideItems = getGuideItems('' + $scope.data.sys_id);
+			$scope.data.guide_requested_for = $scope.guide_requested_for;
+			$scope.server.update().then(function(response) {
+				$scope.data.action = undefined;
+				$scope.data.guideItems = undefined;
+                appendOrderNowOutputParams($scope.data.result);
+				$scope.$emit("$sp.sc_order_guide.submitted", $scope.data.result);
+				window.GlideWebAnalytics.trackEvent('Service Catalog' + webAnalyticsMsgSuffix, 'Order Guide Request', 'Catalog Request Submitted', $scope.includedItemsCounter, 0);
+				$scope.submitted = true;
+				hideSpinner();
+				if ($scope.options.auto_redirect == 'false') {
+					spUtil.addInfoMessage($scope.m.requestSubmitted);
+					return;
+                } else {
+					if ($scope.data.result.request_id) 
+						$location.search('id=sc_request&is_new_order=true&table=sc_request&sys_id=' + $scope.data.result.request_id);
+					else 
+						$location.search('id=requests&is_new_order=true');
+				}
+			}, function(error) {
+				hideSpinner();
+				spUtil.addErrorMessage(error);
+				return;
+			});
+			return $scope.submitted;
+		}
+	}
+
+	function showOrderConfirmation() {
+		return $scope.data.sys_properties.twostep && $scope.data.sc_cat_item.request_method != "submit" &&
+            !$scope.data.sc_cat_item.has_requested_for_variable && $scope.requested_for_variable_count !== $scope.totalIncluded;
+	}
+	
+	function hideSpinner() {
+		if ($scope.data.isMEE)
+			cabrillo.viewLayout.hideSpinner();
+	}
+	
+	//If its a two step process, ordernow will return sys_id, number and table. In case of checkout,  
+	//If the cart has one producer, output would contain sys_id, number and table. But in case of cat items,  sys_id, number, table
+	//would be empty. 
+	//Making the output consitent between the above three cases.
+    function appendOrderNowOutputParams(output) {
+            output.sys_id = output.sys_id || output.request_id;
+            output.number = output.number || output.request_number;
+            output.table = output.table || 'sc_request';
+	}
+	/*********************************************************************************************/
+	/********************************        Submit Handlers End           ***********************/
+	/*****################################################################################********/
+	var catalogUtil = {
+		updateGform: function() {
+			var g_form = getCurrentGForm();
+			if (g_form)
+				$scope._atf.expose('g_form', spAtf.augmentForm(g_form));
+		},
+		addRow: function(fieldId, timeoutInMS) {
+			var deferred = $q.defer();
+			var g_form = getCurrentGForm();
+			if (g_form) {
+				if (timeoutInMS <= 0)
+					timeoutInMS = 1000;
+				$scope.$broadcast("$sp.sc_multi_row.create_row", fieldId, g_form.getSysId());
+				$scope.$on('spModel.gForm.initialized', function(e, gFormInstance) {
+					if (gFormInstance.getSysId() == fieldId)
+						deferred.resolve();
+				});
+				$timeout(function() {
+					deferred.reject();
+				}, timeoutInMS);
+            } else
+				deferred.reject();
+			return deferred.promise;
+		},
+		navigateToStep: function(num, timeout) {
+			var defer = $q.defer();
+			var step = parseInt(num) - 1;
+			if (Math.abs(step - $scope.guide_step) != 1) {
+				defer.reject("Can't navigate to next step");
+				return defer.promise;
+			}
+			if (step > $scope.guide_step)
+				$scope.goNext(timeout);
+			else {
+				$scope.goPrev();
+				defer.resolve();
+			}
+			var cleanup = $scope.$on('$sp.service_catalog.form_submit_failed', function() {
+				cleanup();
+				defer.reject("Can't navigate to next step");
+			});
+			var cleanup1 = $scope.$on('$sp.service_catalog.form_submitted', function() {
+				cleanup1();
+				defer.resolve("Can navigate to next step");
+			});
+			return defer.promise;
+		},
+		validateIncludedList: function(list, stage) {
+			var items = list.split(',').reduce(function(obj, item) {
+				obj[item] = false;
+				return obj;
+			}, {});
+			var included = stage == 1 ? $scope.includedItems : $scope.includedItems.filter(function(item) {
+				return item.included == true;
+			});
+			if (Object.keys(items).length != included.length)
+				return false;
+			for (var i = 0; i < included.length; i++)
+				if (!items.hasOwnProperty(included[i].sys_id))
+					return false;
+			return true;
+		},
+		openItem: function(item, state, timeoutInMS) {
+			if (timeoutInMS <= 0)
+				timeoutInMS = 10000;
+			var defer = $q.defer();
+			if (includedGformInstances[item]) {
+				openItemHelper(item, state, defer);
+			}
+			$scope.$on('spModel.gForm.initialized', function(e, gFormInstance) {
+				if (gFormInstance.getSysId() == item) {
+					openItemHelper(item, state, defer);
+				}
+			});
+			$timeout(function() {
+				defer.reject();
+			}, timeoutInMS);
+			return defer.promise;
+		},
+		getPrice: function() {
+			var res = {};
+			var item = $scope.includedItems.find(function(itemData) {
+				return itemData.isOpen == true;
+			});
+			if (item) {
+				res.price = item.price;
+				res.recurring_price = item.recurring_price;
+				res.recurring_frequency = item.recurring_frequency;
+			}
+			return res;
+		},
+		getGuidePrice: function() {
+			return $scope.price_display;
+		},
+		addToCart: function() {
+			var defer = $q.defer();
+			if ($scope.guide_step == 2)
+				$scope.triggerAddToCart();
+			if (!$scope.submitted)
+				defer.reject("Can't submit form.");
+			else
+				defer.resolve();
+			return defer.promise;
+		},
+		submitOrderGuide: function() {
+			var defer = $q.defer();
+			if ($scope.guide_step == 2 && $scope.triggerSubmit()) {
+				if ($scope.showOrderConfirmation)
+					defer.resolve();
+				else {
+					var cleanUp = $scope.$on('$sp.sc_order_guide.submitted', function(o, result) {
+						$timeout(function() {
+							cleanUp();
+							result.single_step = true;
+							defer.resolve(result);
+						}, 10);
+					});
+				}
+			} else
+				defer.reject();
+			return defer.promise;
+		}
+	};
+	/********************************************************************************************/
+	/********************************                ATF End            *************************/
+	/*****###############################################################################********/
+	/********************************************************************************************/
+	/********************************            Cabrillo Start         *************************/
+	/*****###############################################################################********/
+	function clearCabrilloBottomButtons() {
+		if ($scope.data.isMEE) {
+			cabrillo.viewLayout.setBottomButtons();
+		}
+	}
+
+	function showCabrilloBottomButtons() {
+		if (!$scope.data.isMEE) return;
+		if ($scope.guide_step === 0) {
+			addCabrilloBottomButtons({
+				title: [$scope.data.msgs.nextMsg],
+				fn: [$scope.goNext]
+			});
+		}
+		if ($scope.guide_step === 1) {
+			var itemOpened = $scope.includedItems.find(function (item) {
+				return item.isOpen;
+			});
+			if (itemOpened) {
+				$scope.showCancel(itemOpened.sys_id);
+			}
+		}
+	}
+	
+	function addCabrilloBottomButtons(buttonDetails) {
+		if ($scope.data.isMEE) {
+			var buttons = [];
+			clearCabrilloBottomButtons();
+			switch($scope.guide_step) {
+				case 0:
+                    buttons = [{
+							title: buttonDetails.title[0],
+							enabled: true,
+							backgroundColor: $scope.data.sys_properties.mobileNativeColor,
+							textColor: '#FFFFFF'
+						}];
+					cabrillo.viewLayout.setBottomButtons(buttons, function(buttonIndex) {
+						buttonDetails.fn[buttonIndex]();
+					});
+					cabrillo.viewLayout.showBackButton();
+					break;
+				case 1:
+                    buttons = [{
+							title: buttonDetails.title[0],
+							enabled: true,
+							backgroundColor: '#f7f7f7',
+							textColor: '#000000'
+						},
+						{
+							title: buttonDetails.title[1],
+							enabled: true,
+							backgroundColor: $scope.data.sys_properties.mobileNativeColor,
+							textColor: '#FFFFFF'
+                        }
+                    ];
+					cabrillo.viewLayout.setBottomButtons(buttons, function(buttonIndex) {
+						//Disable next button in choose option if all the items are marked as not included.
+						// however the previous button should still work
+						if (!($scope.submitted || $scope.totalIncluded <= 0) || buttonIndex === 0) {
+							buttonDetails.fn[buttonIndex]();
+						}
+					});
+					cabrillo.viewLayout.hideBackButton();
+					break;
+				case 2:
+					if ($scope.data.sys_properties.cartEnabled && $scope.showAddToCart) {
+                        buttons = [{
+								title: buttonDetails.title[0],
+								enabled: true,
+								backgroundColor: '#f7f7f7',
+								textColor: '#000000'
+							},
+							{
+								title: buttonDetails.title[1],
+								enabled: true,
+								backgroundColor: $scope.data.sys_properties.mobileNativeColor,
+								textColor: '#FFFFFF'
+                            }
+                        ];
+						cabrillo.viewLayout.setBottomButtons(buttons, function(buttonIndex) {
+							buttonDetails.fn[buttonIndex]();
+						});
+					} else {
+                        buttons = [{
+								title: buttonDetails.title[1],
+								enabled: true,
+								backgroundColor: $scope.data.sys_properties.mobileNativeColor,
+								textColor: '#FFFFFF'
+							}];
+						cabrillo.viewLayout.setBottomButtons(buttons, function(buttonIndex) {
+							buttonDetails.fn[1]();
+						});
+					}
+					cabrillo.viewLayout.hideBackButton();
+					break;
+			}
+		}
+	}
+	var mespOpenPopupUnregister = $rootScope.$on("mesp.popup.open", function() {
+		// Timeout is to give a better user experience otherwise when this popup opens,
+		// the cabrillo buttons will be displayed immediately giving a bad user experience.
+		$timeout(function(){
+			clearCabrilloBottomButtons();
+		});
+	});
+	var mespClosePopupUnregister = $rootScope.$on("mesp.popup.close", function() {
+		// Timeout is to give a better user experience otherwise when this popup opens,
+		// the cabrillo buttons will be displayed immediately giving a bad user experience.
+		$timeout(function(){
+			showCabrilloBottomButtons();
+		});
+	});
+	
+	$window.onpageshow = function(){
+		if(c.isNative)
+			$scope.$emit('spModel.gForm.showNativeMobileButtons');
+	};
+	/**********************************************************************************************/
+	/********************************            Cabrillo End           ****************************/
+	/*****##################################################################################********/
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.order-guide-mobile {
+  border: 0;
+  box-shadow: none;
+  
+  .mobile-attachment-label {
+    float: none;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    button, .add-attachment-content {
+      color: $link-color;
+    }
+  }
+  
+  .mobile-summary{
+  	display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .iconlink {
+  	padding: 0 !important;
+    width: 100%;
+    span.step-text {
+      font-weight: bold;
+      font-size: 20px;
+      margin: 0 !important;
+      top: 0;
+      padding-left: 5px;
+    }
+  }
+  
+  .less-text .read-more,
+  .more-text .read-less {
+    display: block;
+    text-align: center;
+    margin: 10px auto;
+  }
+  
+  .list-group-mobile {
+		.accordion-header {
+      &amp;.disable-row .accordion-toggle {
+        pointer-events: none;
+        color: $gull-grey;
+      }
+
+      .accordion-toggle {
+        &amp;:focus {
+        	border: 0;
+          box-shadow: none;
+        }
+        
+        .row {
+          padding: 20px 0;
+          margin: 0 !important;
+          &amp;&gt;div {
+          	padding: 0;
+          }
+        }
+        
+        .og-check-bucket {
+          display: block;
+          padding-left: 10px;
+          height: 20px;
+          width: 60px;
+
+          input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+          }
+
+          .og-check {
+            position: absolute;
+            pointer-events: auto;
+            top: -3px;
+            height: 30px;
+            width: 30px;
+            background-color: #fff;
+            border: 1px solid $mesp-input-border;
+            border-radius: 50%;
+
+            &amp;:after {
+              content: "";
+              position: absolute;
+              display: none;
+              left: 12px;
+              top: 8px;
+              width: 5px;
+              height: 10px;
+              border: solid #fff;
+              border-width: 0 2px 2px 0;
+              -webkit-transform: rotate(45deg);
+              -ms-transform: rotate(45deg);
+              transform: rotate(45deg);
+            }
+          }
+
+          input:checked ~ .og-check {
+            background-color: $mesp-input-radio;
+            &amp;:after {
+              display: block;
+            }
+          }
+        }
+
+        .og-mobile-item {
+          display: grid;
+          grid-template-columns: auto 100px;
+					
+          .item-name {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            
+            &amp; ~ label {
+            	justify-self: end;
+            }
+          }
+          
+          .options {
+          	color: $gull-grey;
+          }
+          
+          .accordion-icon {
+            margin-left: 12px;
+            padding-right: 3px;
+
+            &amp;:before {
+              content: "\f105";
+              font-family: FontAwesome;
+              font-size: 20px;
+            }
+          }
+        }
+      }
+
+      .collapsing {
+        transition: none;
+      }
+
+	    .panel-heading, .panel-heading:hover {
+        background-color: transparent;
+      }
+    }
+   
+    .guide-item-details-wrapper-mobile {      
+      position: fixed !important;
+      background-color: #FFF !important;
+      z-index: 1 !important;
+      height: 100% !important;
+      width: 100% !important;
+      top: 0 !important;
+      left: 0 !important;
+      overflow: scroll;
+      
+      .title-mobile {
+        font-size: 22px;
+        font-weight: 600;
+      }
+      
+      .og-item-price {
+        padding: 23px 0px 23px 14px;
+        margin: 18px -8px 0px -8px;
+        border-top: 1px solid $mesp-input-border;
+        strong {
+          font-size: 18px;
+        }
+        span {
+          font-size: 14px;
+        }
+        label {
+          display: block;
+          color: $gull-grey;
+        }
+      }
+    }
+    
+    .summary {
+      section {
+	      display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px 5px 5px 0;
+      }
+      
+      .guide-item {
+      	display: flex;
+        align-items: center;
+      }
+      
+      .guide-item-quantity {
+        padding: 5px 10px;
+        margin: 0 10px 0 0;
+        background-color: #F0F0F0;
+        border-radius: 5px;
+      }
+      
+      .guide-item-name {
+      	display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  }
+}
+
+.guide-item-details-wrapper {
+	position: relative;
+  background-color: #F8F9F9;
+}
+
+.empty-state-content {
+  margin-top: 30px;
+
+  h3 {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+}
+
+.attachment-label {
+  float: right;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.guide-image {
+  max-height: 240px;
+  padding: 5px;
+  display: inline;
+}
+
+.panel-button {
+  float: none;
+}
+
+.file-list-wrap {
+	margin-bottom: 10px;
+}
+
+.guide-item-image {
+  max-height: 150px;
+  padding: 10px;
+  display: inline-block !important;
+}
+
+.item-icon {
+  max-width:100%;
+  height:auto;
+}
+
+.disabled-mask {
+  background-color: #F8F9F9;
+  position: absolute;
+  z-index: 8;
+  opacity: 0.6;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 5px;
+  cursor: not-allowed;
+}
+
+.guide-description, .guide-nav, .tab-item, .og-timeline {
+  overflow: auto;
+}
+
+
+.guide-nav {
+  padding: 0px 40px 20px 40px;
+}
+
+.guide-nav-setp1 {
+  padding-right: 27px;
+}
+
+.iconlink {
+  margin: 5px 0px 5px 0px;
+}
+
+.circle_icon {
+    border: 3px solid;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    padding: 20px;
+    display: inline-block;
+    .step-icon {
+      font-size: 20px;
+    	position: relative;
+    	top: -9px;
+    	left: -10px;
+    }
+}
+
+.step-text {
+  	position: relative;
+    top: -10px;
+}
+
+.step_active {
+  color: $primary;
+}
+
+.step_inactive {
+  color: $text-muted;
+  opacity: 0.5;
+}
+
+.accordion-header {
+  .panel-heading {
+    padding: 0;
+    .row {
+      padding: 15px;
+      margin: 0;
+    }
+    .align-text {
+      top: 3px;
+    }
+    &amp;:hover {
+    	background-color: lighten($primary, 45%);
+  	}
+    label {
+      font-size: inherit;
+    }
+  }
+  &amp;.panel-open {
+    .panel-heading {
+      border-bottom: 1px solid #dee5e7;
+      &amp;:hover {
+    		background-color: transparent;
+  		}
+    }
+  }
+  .panel-title {
+    	font-size: inherit;
+  }
+}
+
+.list-group {
+	padding-left: 28px;
+  padding-right: 28px;
+  padding-top: 10px;
+  padding-bottom: 0px;
+}
+
+.accordion-icon {
+  margin-left: 30px;
+}
+
+
+.mandatory-header {
+  border-left: 3px #d9534f solid !important;
+}
+
+.mandatory-icon {
+  color: #d9534f;
+  margin-left: -9px
+}
+
+.timeline-container {
+  position: sticky;
+  position: -webkit-sticky;
+  position: -ms-sticky;
+  height:auto;
+  top: -($font-size-h2 + $font-size-base + 48px);
+  z-index: 10;
+  background-color: inherit;
+  border-radius: 4px 4px 0 0;
+}
+
+.og-timeline .iconlink label {
+  font-weight: 600;
+  font-size: 0.8em;
+  line-height: 1.8em;
+}
+
+.include-loader {
+  text-align: center;
+  
+}
+
+.og-switch {
+  .input-switch {
+    font-size: inherit;
+    label.switch {
+      border-radius: 20px;
+      &amp;::before {
+        border-radius: 20px;
+      }
+    }
+    input[type=checkbox]:checked ~ .switch {
+    	background-color: $primary;
+		}
+  }
+}
+
+.summary {
+  tr {
+    height: 69px;
+  }
+  margin-bottom: 0;
+  .summary-excluded {
+    color: #ccc;
+  }
+  .not-included-pill {
+    color: #FFF;
+    background-color: #f0ad4e;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bolder;
+    white-space: nowrap;
+  }
+}
+
+.m-r-6 {
+  margin-right: 6px !important;
+}
+
+.wrap-word {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+//animation
+
+.fa-pulse {
+  -webkit-animation: fa-spin 1s infinite steps(8);
+  animation: fa-spin 1s infinite steps(8);
+}
+
+.options {
+  color: $primary;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+/* IE10+ CSS styles go here */
+   .timeline-container {
+   position: static;
+   top: 0px;
+   }
+}
+
+ .help-tag-icon {
+  	color: $sc-field-error-color;
+  }
+  
+@media only screen and (max-width:992px) {
+  .pull-left-xs {
+    float: left !important;
+  }
+  
+  .left-align-xs {
+    text-align: left !important;
+  }
+  
+  .padding-left-xs {
+    padding-left:15px !important;
+  }
+  
+  .iconlink {
+    padding: 0 15px;
+  }
+  
+  .wrapper-cart-xs {
+    padding: 10px !important;
+  }
+  
+  .not-included {
+    padding: 3px !important;
+  }
+  
+  .pull-right-xs {
+    float: right !important;
+  }
+  
+  .remove-margin-bottom-xs {
+    margin-bottom: 0px !important;
+  }
+  
+  .add-margin-bottom-xs {
+    margin-bottom: 15px !important;
+  }
+  
+  .list-group {
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
+
+  .border-top-xs {
+    border-top: none;
+  }
+  
+  .border-bottom-xs {
+    border-bottom: none;
+  }
+  
+  .button-image-xs {
+    padding-left: 7%;
+    line-height: 160%;
+  }
+  
+  .guide-image {
+    display: block;
+    margin: auto;
+    max-height: 220px
+  }
+  
+  .og-switch {
+    padding-top:10px;
+    .input-switch {
+      margin-left: 5px !important;
+    }
+    .input-switch input[type=checkbox]  ~ .switch {
+       height: 20px;
+       width: 35px
+    }
+    .input-switch input[type=checkbox]:checked  ~ .switch:before {
+      left: 15.5px;
+    }
+   }
+  .summary {
+     tr {
+         height: 33px;
+      }
+    .summary-excluded {
+    	color: inherit;
+  	}
+  }
+  .timeline-container {
+    top: -($font-size-h2 + $font-size-base + 28px);
+  }
+  .guide-nav-setp1 {
+    padding: 0 13px 20px 13px;
+  }
+	.timeline-container {
+     position: inherit;
+  }
+  .included-xs {
+    font-size:13px; 
+    vertical-align:3px;
+  }
+  .panel-body {
+    padding: 0;
+  }
+  .guide-item-image-xs {
+    max-height: 120px;
+  	padding: 10px;
+    float: left;
+  }
+  .guide-description {
+    display: inline;
+  }
+  .read-more, .read-less {
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .more-text {
+    display: none;
+  }
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data>{&#13;
+"options": {&#13;
+"sys_id": "6690750f4f7b4200086eeed18110c761"&#13;
+}&#13;
+}</demo_data>
+        <description/>
+        <docs/>
+        <field_list>color,title</field_list>
+        <has_preview>true</has_preview>
+        <id/>
+        <internal>false</internal>
+        <link><![CDATA[function(scope, elem) {
+		scope.setFocusToAttachmentButton = function () {
+			elem.find('.sp-attachment-add')[0].focus();
+		}
+}]]></link>
+        <name>Copy of SC Order Guide</name>
+        <option_schema>[{"hint":"This property will 'show less' description of order guide with an option of 'read more' to read full description.","name":"show_less_orderguide","default_value":"true","section":"Presentation","label":"Enable Show More/Less for Order Guide description on Mobile","type":"boolean"},{"hint":"Show the widget in compact mode","name":"compact_mode","section":"Presentation","default_value":"false","label":"Compact Mode","type":"boolean"},{"hint":"Hide Delivery Time in each Item","name":"hide_delivery_time","section":"Presentation","default_value":"false","label":"Hide Delivery Time","type":"boolean"},{"hint":"Show the add to cart button","name":"show_add_cart_button","section":"Behavior","default_value":"true","label":"Show Add to Cart","type":"boolean"}]</option_schema>
+        <public>true</public>
+        <roles/>
+        <script><![CDATA[(function () {
+	var guideJS;
+	data.isTwoStepEnabled = gs.getProperty('glide.sc.sp.twostep');
+	//For cascading, initialising the below vairiables
+	var variableClassToCascade = ["RequestedForQuestion"];
+	var guideVariableNameMap = {};
+	var guideVariableClassMap = {};
+	var localInput = input; //to safeguard pullution of "input" via BR or other scripts
+	
+	data.sys_id = $sp.getParameter("sys_id") || localInput.sys_id || options.sys_id;
+	data.engagement_channel = options.native_mobile ? 'mobile' : (options.isServiceWorkspace ? 'workspace' : 'sp');
+	data.referrer = $sp.getParameter("referrer");
+	
+	if (localInput && localInput.action == "from_attachment")
+		return;
+	if (localInput && localInput.action == "get_requested_for") {
+		data.requested_for = new global.GlobalServiceCatalogUtil().getRequestedFor(localInput.parentParams);
+		return;
+	}
+
+	['auto_redirect', 'requested_for_id', 'requested_for_display'].forEach(function (embeddedWidgetOption) {
+		if (localInput && typeof localInput[embeddedWidgetOption] != 'undefined')
+			options[embeddedWidgetOption] = localInput[embeddedWidgetOption];
+	});
+	if(localInput && localInput.action == 'order_guide') {
+		data.orderGuideModal = $sp.getWidget('widget-modal', {
+																											embeddedWidgetId: 'sc-checkout', 
+																											embeddedWidgetOptions: {
+                cart: {
+                    name: localInput.cart
+                },
+																																	action: localInput.action, 
+																																	item: localInput.itemDetails, 
+                requested_for: {
+                    id: options.requested_for_id,
+                    displayValue: options.requested_for_display
+                },
+																																	auto_redirect: options.auto_redirect,
+																																	parentParams: localInput.workspaceParams,
+																																	native_mobile: options.native_mobile,
+																																    isServiceWorkspace: options.isServiceWorkspace,
+																																	referrer: data.referrer
+																																}, 
+																											backdrop: 'static', 
+																											keyboard: false, 
+																											size: 'md'
+																								});
+		return;
+    } else if (localInput && localInput.action === 'log_request_cart') {
+		 $sp.logStat('Add to Cart Request', localInput.itemDetails.sys_class_name, localInput.itemDetails.sys_id, localInput.itemDetails.name, $sp.getPortalRecord().getUniqueValue());
+		 return;
+    } else if (localInput && localInput.action == "init_guide") {
+		guideJS = new sn_sc.OrderGuide('' + localInput.orderGuideData.sysparm_id);
+		var temp = guideJS.init(localInput.orderGuideData);
+		if (JSUtil.notNil(temp.errMsg)) {
+			gs.addErrorMessage(temp.errMsg);
+			data.error = true;
+			return;
+		}
+		for (var gf in localInput.orderGuideData._fields) {
+			var field = localInput.orderGuideData._fields[gf];
+			if (variableClassToCascade.indexOf(field._class_name) > -1)
+				guideVariableClassMap[field._class_name] = field;
+			else
+				guideVariableNameMap[field.name] = field;
+		}
+		//data.guide_requested_for will be needed to populate requested for field on cart_items of the included items.
+        data.guide_requested_for = "";
+        if (guideVariableClassMap.RequestedForQuestion)
+		data.guide_requested_for = guideVariableClassMap.RequestedForQuestion.value;
+        else {
+            var defaultRequestedForValue = getDefaultRequestedForUser(localInput.orderGuideData, localInput.options);
+            if (defaultRequestedForValue)
+                guideVariableClassMap.RequestedForQuestion = {
+                    'value': defaultRequestedForValue,
+                    'displayValue': GlideUser.getUserByID(defaultRequestedForValue).getDisplayName()
+                };
+        }
+
+		data.showIncludeToggle = guideJS.isIncludeItems();
+		data.requested_for_variable_count = 0;
+        var item;
+        var itemGlobalData = {
+            items: [],
+            client_scripts: {},
+            ui_policies: {},
+            ui_scripts: null
+        };
+		for(var i = 0; i < temp.items.length; i++) {
+			var includedItem = new sn_sc.CatItem(temp.items[i].sys_id);
+            if (!validateAccessForIncludedItem(includedItem, data.guide_requested_for))
+				continue;
+			var itemData = {
+				'sys_id': temp.items[i].sys_id, 
+				'table': 'sc_cat_item', 
+				'quantity': temp.items[i].quantity, 
+				'is_guide': true, 
+				'is_ordering': true,
+				'variables' : {}
+			};
+			if (localInput.orderGuideData.cascade) {
+				for (var gf in localInput.orderGuideData._fields) {
+					var field = localInput.orderGuideData._fields[gf];
+					itemData.variables[field.name] = field.value;	
+				}
+			}
+			if (guideVariableClassMap.RequestedForQuestion)
+				itemData.requested_for = guideVariableClassMap.RequestedForQuestion.value;
+				
+            item = $sp.getCatalogItem(itemData);
+			item.quantity = temp.items[i].quantity;
+			item.show_quantity = temp.items[i].show_quantity;
+			item.isOrderGuideItem = true;
+			item.included = true;
+			item.delayView = true;
+			item.sysparm_item_guid = gs.generateGUID();
+			item._attachmentGUID = item.sysparm_item_guid;
+			item.order = parseInt(temp.items[i].order);
+			item.native_mobile = options.native_mobile == 'true';
+			if (item.has_requested_for_variable)
+				data.requested_for_variable_count++;
+
+            transferDataIntoGloablObject(item, itemGlobalData);
+
+			var table_name = 'sc_cart_item';
+			var className = item.sys_class_name;
+			if (!new global.CatalogItemTypeProcessor().canCreateNormalCartItem(className)) {
+				if (className == 'sc_cat_item_producer') {
+					var gr = new GlideRecord('sc_cat_item_producer');
+					if (gr.get(item.sys_id))
+						table_name = gr.getValue('table_name');
+				}
+			}
+			item.targetTable = table_name;
+			for (var field in item._fields) {
+				var f = item._fields[field];
+                                if (f.sys_readonly)
+                                	continue;
+
+				if (guideVariableClassMap[f._class_name])
+			        	copyField(guideVariableClassMap[f._class_name], f);
+				else if(localInput.orderGuideData.cascade && guideVariableNameMap[f.name]) {
+					copyField(guideVariableNameMap[f.name], f);
+					if (f.type == 'sc_attachment')
+						f.value = new VariableUtil().copyAttachment(guideVariableNameMap[f.name].value, 'ZZ_YY' + item.targetTable, item.sysparm_item_guid);
+				}
+                if (f._class_name === "RequestedForQuestion") {
+                    handleDelegationCheckOnField(includedItem, f);
+                    handleRequestedForReadOnlyOnField(data.guide_requested_for, f);
+                }
+			}
+			if (temp.variable_assignments[item.sys_id]) {
+				var cur = temp.variable_assignments[item.sys_id];
+				for (var fieldId in cur) {
+					var q = GlideappQuestion.getQuestion(fieldId);
+					item._fields[q.getName()].value = cur[fieldId];
+					if (q.getType() == 21 || q.getType() == 8) {
+						q.setValue(cur[fieldId]);
+						if (q.getType() == 21) {
+							var vals = '' + q.getDisplayValues();
+							vals = vals.slice(1, -1);
+							item._fields[q.getName()].display_value_list = vals.split(', ');
+						}
+					}
+					item._fields[q.getName()].displayValue = q.getDisplayValue();
+				}
+			}
+            itemGlobalData.items.push(item);
+		}
+        data.itemGlobalData = itemGlobalData;
+		if(temp.conflicting_cart_domain)
+            data.conflictingCartDomainMsg = gs.getMessage("Your cart has item(s) belonging to '{0}' domain. To continue to add this item, clear the cart or check out the existing item(s).", temp.conflicting_cart_domain);
+		return;
+    } else if (localInput && localInput.action == "checkout_guide") {
+		guideJS = new sn_sc.OrderGuide('' + data.sys_id);
+		var cartJS = new sn_sc.CartJS('' + data.sys_id);
+        if (localInput.requested_for.id)
+            cartJS.setRequestedFor(localInput.requested_for.id);
+		for(var i = 0; i < localInput.guideItems.length; i++) {
+			if(localInput.guide_requested_for)
+				localInput.guideItems[i].sysparm_guide_requested_for = localInput.guide_requested_for;
+			try {
+			guideJS.navigateFromMap(localInput.guideItems[i]);
+			} catch (e) {
+                //Should never Happen
+			}
+		}
+		cartJS.activateGuide();
+		cartJS.setParentParams(localInput.workspaceParams);
+		cartJS.setEngagementChannel(data.engagement_channel);
+		cartJS.setReferrer(data.referrer);
+		data.result = cartJS.checkoutGuide();
+		var portalId = $sp.getPortalRecord().getUniqueValue();
+		$sp.logStat('Order Now Request', localInput.sc_cat_item.sys_class_name, localInput.sc_cat_item.sys_id, localInput.sc_cat_item.name, portalId);
+		$sp.logStat('Cat Item Request', localInput.sc_cat_item.sys_class_name, localInput.sc_cat_item.sys_id, localInput.sc_cat_item.name, portalId);
+		return;
+    } else if (localInput && localInput.action == "add_to_cart") {
+		var cart = new sn_sc.CartJS();
+		guideJS = new sn_sc.OrderGuide('' + localInput.sys_id);
+		for(var i = 0; i < localInput.items.length; i++) {
+			if(localInput.guide_requested_for)
+				localInput.items[i].sysparm_guide_requested_for = localInput.guide_requested_for;
+			localInput.items[i].sysparm_cart_name = "";
+			try {
+			guideJS.navigateFromMap(localInput.items[i]);
+			} catch (e) {
+                //Should never happen
+			}
+		}
+		if (guideJS.isUseCustomCart())
+			new sn_sc.CartJS(localInput.sys_id).empty("");
+		cart.activateGuide();
+		return;
+    } else if (localInput && localInput.action == "format_prices") {
+		data.frequencySequence = [];
+		var gr = new GlideRecord('sys_choice');
+		gr.addQuery('name', 'sys_frequency');
+		gr.addQuery('language', gs.getSession().getLanguage());
+		gr.orderBy('sequence');
+		gr.query();
+		while(gr.next())
+			data.frequencySequence.push(gr.label.getDisplayValue());
+		var spCurrencyFormatter = new SPCurrencyFormatter();
+		data.frequencyMap = {};
+		for(var key in localInput.prices)
+			data.frequencyMap[key] = spCurrencyFormatter.format(localInput.prices[key]);
+		return;
+	}
+	// portal can specify a catalog and category home page
+	data.sc_catalog_page = $sp.getDisplayValue("sc_catalog_page") || "sc_home";
+	data.sc_category_page = $sp.getDisplayValue("sc_category_page") || "sc_category";
+	var catalogID = $sp.getParameter("catalog_id") ? $sp.getParameter("catalog_id") + "" : "-1";
+	var m = data.msgs = {};
+	m.scHomeMsg = gs.getMessage("Service Catalog");
+	m.step1 = gs.getMessage("Describe Needs");
+	m.step2 = gs.getMessage("Choose Options");
+	m.step3 = gs.getMessage("Summary");
+	m.prevMsg = gs.getMessage("Previous");
+	m.nextMsg = gs.getMessage("Next");
+	m.submitMsg = gs.getMessage("Submit");
+	m.orderNowMsg = gs.getMessage("Order Now");
+	m.requestMsg = gs.getMessage("Request");
+	m.submittedMsg = gs.getMessage("Submitted");
+	m.createdMsg = gs.getMessage("Created");
+	m.clickMsg = gs.getMessage("click here to view");
+	m.dialogTitle = gs.getMessage("Delete Attachment");
+	m.dialogMessage = gs.getMessage("Are you sure?");
+	m.dialogOK = gs.getMessage("OK");
+	m.dialogCancel = gs.getMessage("Cancel");
+	m.requestSubmitted = gs.getMessage("Thank you, your request has been submitted.");
+	m.viewAttachedImage = gs.getMessage("View attached image");
+	m.downloadAttachment = gs.getMessage("Download attachment");
+	data.maxAttachmentSize = parseInt(gs.getProperty("com.glide.attachment.max_size", 1024));
+	if (isNaN(data.maxAttachmentSize))
+		data.maxAttachmentSize = 24;
+	m.largeAttachmentMsg = gs.getMessage("Attached files must be smaller than {0} - please try again", "" + data.maxAttachmentSize + "MB");
+	m.renameSuccessMsg = gs.getMessage("Attachment renamed successfully");
+	m.deleteSuccessMsg = gs.getMessage("Attachment deleted successfully");
+	m.invalidRecordMsg = gs.getMessage('You are either not authorized or record is not valid.');
+	m.delete_attachment = gs.getMessage("Delete Attachment?");
+    m.chooseOptionsOpenedMsg = gs.getMessage("Opened Choose options");
+	data.hideDeliveryTime = (options.hide_delivery_time == 'true');
+	data.recordFound = true;
+	if (options.sys_id)
+		data.sys_id = options.sys_id;
+	if (!data.sys_id) {
+		data.recordFound = false;
+		return;
+	}
+	var validatedItem = new sn_sc.CatItem('' + data.sys_id);
+  if (!validatedItem.canView() || !validatedItem.isVisibleServicePortal()) { 
+		data.recordFound = false;
+    return;
+	}	
+	if (options.native_mobile == 'true') {
+			if (gs.getProperty('glide.sc.mobile.item_class_not_supported', '').split(',').indexOf(validatedItem.getRecordClass()) > -1) {
+				data.not_for_mobile = true;
+				return;
+			}
+			if (gs.getProperty('glide.sc.mobile.include_desktop_only_items', 'true') == 'false') {
+				if (validatedItem.getAvailability() == 'on_desktop') {
+					data.not_for_mobile = true;
+					return;
+				}
+			}
+		}
+	data.showPrices = $sp.showCatalogPrices();
+  data.sc_cat_item = $sp.getGuide(data.sys_id, true, false);
+	data.readonly_user = gs.hasRole('snc_read_only');
+	data.sc_cat_item.native_mobile = options.native_mobile == 'true';
+	data.sys_properties = {
+		twostep: gs.getProperty("glide.sc.sp.twostep", "true") == 'true',
+		mobileNativeColor: gs.getProperty("glide.sc.mobile.primary_color", "#1f8476"),
+		cartEnabled: gs.getProperty("glide.sc.cart.enabled", "false") == "true"
+	};
+	if (data.sc_cat_item.category) {
+		var categoryJS;
+		var categoryID = validatedItem.getFirstAccessibleCategoryForSearch((catalogID && catalogID != "-1" ? catalogID : $sp.getCatalogs().value + ""));
+		if (GlideStringUtil.isEligibleSysID($sp.getParameter("sysparm_category"))) {
+			categoryJS = new sn_sc.CatCategory($sp.getParameter("sysparm_category") + "");
+			categoryID = $sp.getParameter("sysparm_category") + "";
+        } else if (categoryID)
+			categoryJS = new sn_sc.CatCategory(categoryID);
+		if (categoryJS && GlideStringUtil.isEligibleSysID(categoryJS.getID())) {
+			data.category = {
+				name: categoryJS.getTitle(),
+				url: '?id=' + data.sc_category_page + '&sys_id=' + categoryID
+			}
+			if (categoryJS.getCatalog()) {
+				catalogID = categoryJS.getCatalog();
+				data.catalog_id = catalogID;
+				var catalogObj = new sn_sc.Catalog(catalogID);
+				data.sc_catalog = catalogObj.getTitle();
+			}
+			data.categories = [];
+			data.categories.push({
+				label: categoryJS.getTitle(),
+				url: '?id=' + data.sc_category_page + '&sys_id=' + categoryID
+			});
+			while(categoryJS && categoryJS.getParent()) {
+				var parentId =  categoryJS.getParent();
+				categoryJS = new sn_sc.CatCategory(parentId);
+				var category = {
+					label: categoryJS.getTitle(),
+					url: '?id=' + data.sc_category_page + '&sys_id=' + parentId
+				};
+				data.categories.unshift(category);
+			}
+			if ((($sp.getCatalogs().value + "").split(",")).length > 1) {
+				data.all_catalog_msg = gs.getMessage("All Catalogs");
+			}
+		}
+	}
+    m.openedOrderGuideMsg = gs.getMessage("Order guide {0} opened", data.sc_cat_item.name);
+	$sp.logStat('Cat Item View', data.sc_cat_item.sys_class_name, data.sc_cat_item.sys_id, data.sc_cat_item.name, $sp.getPortalRecord().getUniqueValue());
+})();
+
+function copyField(srcField, dstField) {
+	dstField.value = srcField.value;
+	dstField.displayValue = srcField.displayValue;
+	dstField.display_value_list = srcField.display_value_list;
+}
+
+function transferDataIntoGloablObject(item, itemGlobalData) {
+    if (item.client_script) {
+        pullObjectsIntoGlobal(item.client_script.onLoad, itemGlobalData.client_scripts);
+        pullObjectsIntoGlobal(item.client_script.onChange, itemGlobalData.client_scripts);
+        pullObjectsIntoGlobal(item.client_script.onSubmit, itemGlobalData.client_scripts);
+        item.client_script.onLoad = getIdArrFromObjectArray(item.client_script.onLoad);
+        item.client_script.onChange = getIdArrFromObjectArray(item.client_script.onChange);
+        item.client_script.onSubmit = getIdArrFromObjectArray(item.client_script.onSubmit);
+    }
+    pullObjectsIntoGlobal(item.policy, itemGlobalData.ui_policies);
+    item.policy = getIdArrFromObjectArray(item.policy);
+    if (!itemGlobalData.ui_scripts)
+        itemGlobalData.ui_scripts = item.ui_scripts;
+
+    item.ui_scripts = [];
+}
+
+function pullObjectsIntoGlobal(objectArr, globalObject) {
+    for (var i in objectArr) {
+        var id = objectArr[i].sys_id;
+        if (!globalObject.hasOwnProperty(id))
+            globalObject[id] = objectArr[i];
+    }
+}
+
+function getIdArrFromObjectArray(objectArr) {
+    var idArr = [];
+    for (var i in objectArr)
+        idArr.push(objectArr[i].sys_id)
+    return idArr;
+}
+
+function getDefaultRequestedForUser(guideData, options) {
+    var requestedForID = "";
+    if (options.requested_for_id)
+        requestedForID = options.requested_for_id;
+    else if (guideData.sysparm_parent_table && guideData.sysparm_parent_sys_id)
+		requestedForID = new global.GlobalServiceCatalogUtil().getRequestForSysID(guideData.sysparm_parent_table, guideData.sysparm_parent_sys_id);
+	
+    return requestedForID;
+}
+
+function handleRequestedForReadOnlyOnField(guideRequestedFor, field) {
+    if (guideRequestedFor)
+        field.sys_readonly = true;
+}
+
+function handleDelegationCheckOnField(item, field) {
+    if (item.isDelegationAllowed(field.value))
+        return;
+
+    var delegationErrorMessage = {
+        message : gs.getMessage("Item is unavailable for this user"),
+        type : "error"
+	};
+
+    field.isServerInvalid = true;
+    if (!field.messages)
+        field.messages = [];
+    
+    field.messages.push(delegationErrorMessage)
+}
+
+function validateAccessForIncludedItem(includedItem, guideRequestedFor) {
+	var isVisibleOnServicePortal = includedItem.isVisibleServicePortal();
+	var isAccessibleForRequester = includedItem.canView();
+	var isDelegationAllowed = true;
+    if (guideRequestedFor)
+        isDelegationAllowed = includedItem.isDelegationAllowed(guideRequestedFor);
+	
+	return isVisibleOnServicePortal && isAccessibleForRequester && isDelegationAllowed;
+}]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-08-29 04:25:18</sys_created_on>
+        <sys_id>36f1598d07123010e7b1f7208c1ed0e4</sys_id>
+        <sys_mod_count>2</sys_mod_count>
+        <sys_name>Copy of SC Order Guide</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_update_name>sp_widget_36f1598d07123010e7b1f7208c1ed0e4</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-07 11:55:13</sys_updated_on>
+        <template><![CDATA[<div class="" ng-if="::(data.recordFound && !data.not_for_mobile)" sn-atf-blacklist="IS_SERVICE_CATALOG">
+ 	<div ng-if="::data.sc_cat_item" class="row">
+		<div class="col-sm-12">
+			<div ng-class="['panel', 'panel-default', {'order-guide-mobile': {{::data.isMEE}}}]">
+				<div ng-class="['timeline-container', {'b-b': {{::!data.isMEE}}}]">
+					<div class="wrapper-md break-word" ng-if="::!data.isMEE">
+						<h2 class="h2 m-n font-thin" ng-if="::data.sc_cat_item.name">{{::data.sc_cat_item.name}}</h2>
+             <div class="text-muted hidden-xs hidden-sm" ng-if="::data.sc_cat_item.short_description">{{::data.sc_cat_item.short_description}}</div>
+					</div>
+					<div ng-class="['wrapper-xs og-timeline', {'b-t': {{::!data.isMEE}}}]">
+						<div class="iconlink col-sm-4 text-a-l pull-left-xs padding-left-xs" ng-class = "{'hidden-xs hidden-sm' : guide_step != 0, 'hidden-lg hidden-md' : (options.compact_mode == 'true' || data.isMEE) && guide_step != 0, 'col-sm-6' : options.compact_mode == 'true' && guide_step == 0}" style="padding-left:61px">
+								<div ng-if="::!data.isMEE" class="circle_icon" ng-class="guide_step == 0 ? 'step_active' : 'step_inactive'">
+                <i class="fa fa-edit step-icon" style="left: -8px;"/>
+              </div>
+							<span class="text-muted m-l-sm step-text">{{m.step1}}</span>	
+						</div>
+						<div class="iconlink col-sm-4 pull-left-xs left-align-xs" ng-class = "{'hidden-xs hidden-sm' : guide_step != 1 , 'hidden-lg hidden-md' : (options.compact_mode == 'true' || data.isMEE) && (guide_step != 1 || isItemOpened), 'col-sm-6' : options.compact_mode == 'true' && guide_step == 1, 'text-a-c': {{ ::!data.isMEE}} }">
+              <div ng-if="::!data.isMEE" class="circle_icon" ng-class="guide_step == 1 ? 'step_active' : 'step_inactive'">
+                <i class="fa fa-list step-icon"/>
+              </div>
+							<span class="text-muted m-l-sm step-text">{{m.step2}}</span>
+						</div>
+						<div class="iconlink col-sm-4 text-a-r left-align-xs" ng-class = "{'pull-left-xs': {{::!data.isMEE}}, 'hidden-xs hidden-sm' : guide_step != 2 , 'hidden-lg hidden-md' : (options.compact_mode == 'true' || data.isMEE) && guide_step != 2, 'col-sm-6' : options.compact_mode == 'true' && guide_step == 2}" style="padding-right:61px">
+              <div ng-if="::!data.isMEE" class="circle_icon" ng-class="guide_step == 2 ? 'step_active' : 'step_inactive'">
+                <i class="fa fa-check step-icon" style="top: -10px;left: -9px;"/>
+              </div>
+              <span ng-if="::!data.isMEE" class="text-muted m-l-sm step-text">{{m.step3}}</span>
+              <div ng-if="::data.isMEE" class="mobile-summary">
+                <span class="text-muted m-l-sm step-text">{{m.step3}}</span>
+                <a ng-if="::data.isMEE" ng-disabled="submitted" name="prev" ng-click="goPrev()">${Edit Options}</a>
+              </div>
+						</div>
+					</div>
+				</div>
+				]]></template>
+    </sp_widget>
+    <sys_update_version action="INSERT_OR_UPDATE">
+        <action>DELETE</action>
+        <application display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</application>
+        <file_path/>
+        <instance_id>f26d1729db854c90b847ac44d49619b8</instance_id>
+        <instance_name>dev94574</instance_name>
+        <name>sp_widget_36f1598d07123010e7b1f7208c1ed0e4</name>
+        <payload>&lt;?xml version="1.0" encoding="UTF-8"?&gt;&lt;record_update table="sp_widget"&gt;&lt;sp_widget action="INSERT_OR_UPDATE"&gt;&lt;category&gt;sc&lt;/category&gt;&lt;client_script&gt;&lt;![CDATA[function ($scope, $http, nowServer, $timeout, spUtil, spScUtil, spModal, spAttachmentUpload, i18n, $window, $location, spAriaUtil, nowAttachmentHandler, $log, $sce, $q, spAtf, spSCNavStateManager, cabrillo) {
+	var c = this;
+	$scope.guide_step = 0;
+	$scope.m = $scope.data.msgs;
+	$scope.evaluatingIncludes = false;
+	$scope.data.isMEE = cabrillo.isNative() &amp;&amp; $scope.options.native_mobile == 'true';
+	$scope.isItemOpened = false;
+    $scope.setDefaultValue = true;
+	includedGformInstances = {};
+	var webAnalyticsMsgSuffix =  $scope.data.isMEE ? " -NOW Mobile" : "";
+	$rootScope.$on('spModel.gForm.rendered', function() {
+		if ($scope.guide_step === 0) {
+			addCabrilloBottomButtons({
+				title: [$scope.data.msgs.nextMsg],
+				fn: [$scope.goNext]
+			});
+		}
+		$timeout(function() {
+			spAtf.init().then(function(atf) {
+				$scope._atf = atf;
+				atf.expose('catalog_util', catalogUtil);
+			});
+		}, 10);
+	});
+	if ($scope.options.isServiceWorkspace &amp;&amp; $window.frameElement) {
+		var workspaceParams = {};
+		workspaceParams.sysparm_parent_table = $window.frameElement.getAttribute('parent-table') || $window.frameElement.parentTable;
+		workspaceParams.sysparm_parent_sys_id = $window.frameElement.getAttribute('parent-sys-id') || $window.frameElement.parentSysId;
+		$scope.data.workspaceParams = workspaceParams;
+	}
+	if ($scope.data.sc_cat_item) {
+		$scope.data.sc_cat_item.trusted_description = $sce.trustAsHtml($scope.data.sc_cat_item.description);
+		if ($scope.data.sc_cat_item.request_method == "request")
+			$scope.submitButtonMsg = $scope.m.requestMsg;
+		else if ($scope.data.sc_cat_item.request_method == "submit")
+			$scope.submitButtonMsg = $scope.m.submitMsg;
+		else
+			$scope.submitButtonMsg = $scope.m.orderNowMsg;
+		// Breadcrumbs
+		if (!$scope.data.categories)
+			$scope.data.categories = [];
+		$scope.data.categories.forEach(function(category, index, categories){
+			categories[index].url = category.url + '&amp;catalog_id=' + $scope.data.catalog_id;
+		});
+		if ($scope.data.categories.length &gt; 0) {
+            $scope.data.categories.unshift({
+                label: $scope.data.sc_catalog || $scope.page.title,
+                url: '?id=' + $scope.data.sc_category_page
+            });
+            $scope.data.categories.push({
+                label: $scope.data.sc_cat_item.name,
+                url: '#'
+            });
+			if ($scope.data.all_catalog_msg) {
+                $scope.data.categories.unshift({
+                    label: $scope.data.all_catalog_msg,
+                    url: '?id=' + $scope.data.sc_category_page + "&amp;catalog_id=-1"
+                });
+		}
+        } else {
+            $scope.data.categories.push({
+                label: $scope.data.sc_cat_item.name,
+                url: '#'
+            });
+		}
+		$timeout(function() {
+			$scope.$emit('sp.update.breadcrumbs', $scope.data.categories);
+		});
+		spUtil.setSearchPage('sc');
+	} else {
+        var notFoundBC = [{
+            label: $scope.page.title,
+            url: '?id=' + $scope.data.sc_catalog_page
+        }];
+		$timeout(function() {
+			$scope.$emit('sp.update.breadcrumbs', notFoundBC);
+		});
+		spUtil.setSearchPage('sc');
+	}
+
+	function isValidItemGform(g_form) {
+		if (g_form.getSysId() === $scope.data.sc_cat_item.sys_id)
+			return true;
+		if ($scope.includedItems)
+			for (var i in $scope.includedItems)
+				if ($scope.includedItems[i].sys_id === g_form.getSysId())
+					return true;
+		return false;
+	}
+
+    function setValueInNextDigestCycle(g_form, value, displayValue) {
+        $timeout(function() {
+		    g_form.setValue($scope.data.sc_cat_item.requested_for_variable_name, value, displayValue);
+        });
+	}
+
+	$scope.$on('spModel.gForm.initialized', function(e, gFormInstance) {
+		if (!isValidItemGform(gFormInstance))
+			return;
+		includedGformInstances[gFormInstance.getSysId()] = gFormInstance;
+		spSCNavStateManager.register(gFormInstance);
+		spSCNavStateManager.isNative($scope.data.isMEE);
+        var g_form = includedGformInstances[$scope.data.sc_cat_item.sys_id];
+        if ($scope.setDefaultValue &amp;&amp; g_form &amp;&amp; c.options.requested_for_id &amp;&amp; c.options.requested_for_display) {
+            $scope.data.requested_for = {
+                id: c.options.requested_for_id,
+                display_value: c.options.requested_for_display
+            };
+            if ($scope.data.sc_cat_item.requested_for_variable_name) {
+                $scope.setDefaultValue = false;
+                setValueInNextDigestCycle(g_form, c.options.requested_for_id, c.options.requested_for_display);
+            }
+        } else if ($scope.setDefaultValue &amp;&amp; $scope.data.workspaceParams &amp;&amp; $scope.data.workspaceParams.sysparm_parent_table &amp;&amp; $scope.data.workspaceParams.sysparm_parent_sys_id) {
+			$scope.server.get({
+				action: 'get_requested_for',
+				parentParams : $scope.data.workspaceParams
+			}).then(function(response) {
+					if (response.data.requested_for &amp;&amp; g_form) {
+                    $scope.setDefaultValue = false;
+						$scope.data.requested_for = response.data.requested_for;
+                    setValueInNextDigestCycle(g_form, response.data.requested_for.id, response.data.requested_for.displayValue);
+					}
+			});
+		}
+		gFormInstance.$private.events.on('submitted', function(event) {
+			gFormInstance.$private.processed = true;
+			if (gFormInstance.getSysId() == $scope.data.sc_cat_item.sys_id) {
+                $scope.$broadcast('$sp.service_catalog.form_submitted', {
+                    action_name: 'submit'
+                });
+				$scope.guide_step = 1;
+				evalIncludes();
+				spSCNavStateManager.unregisterForms(Object.keys(includedGformInstances));
+				$scope.itemShown = 0;
+            } else
+				processChooseOptions();
+		});
+		if ($scope.data.isMEE) {
+			cabrillo.viewLayout.showSpinner();
+			cabrillo.viewLayout.setTitle($scope.data.sc_cat_item.name);
+			$rootScope.$on('spModel.gForm.showNativeMobileButtons', function() {
+				cabrillo.viewLayout.setTitle($scope.data.sc_cat_item.name);
+				showCabrilloBottomButtons();
+			});
+		}
+		// Set Title in Workspace
+		else if ($scope.options.isServiceWorkspace)
+			$window.postMessage({
+				msg:'CATALOG_ITEM_SET_TITLE',
+				title: $scope.data.sc_cat_item.name
+			}, $location.origin);
+
+		$timeout(function() {
+			$rootScope.$emit('spModel.gForm.rendered');
+			hideSpinner();
+		}, 175);
+	});
+    $rootScope.$on('spModel.gForm.rendered', function() {
+        if ($scope.guide_step == 0)
+            spAriaUtil.sendLiveMessage($scope.m.openedOrderGuideMsg);	
+        else if ($scope.guide_step == 1)
+            sendMessageAfterAllItemsAreLoaded();
+    });
+	$scope.$on('spModel.gForm.destroyed', function(e, sys_id){
+		delete includedGformInstances[sys_id];
+	});
+    var validationComplete = $rootScope.$on('$sp.service_catalog.form_validation_complete', function() {
+        $scope.validating = false;
+    });
+	/*************************************************************************************************/
+	/********************************       Guide Navigation Start     *******************************/
+	/*****#####################################################################################********/
+	$scope.goPrev = function() {
+		if ($scope.submitted)
+			return;
+		clearCabrilloBottomButtons();
+		$scope.includedItems.forEach(function (item) {
+			item.isOpen = false;
+		})
+		$scope.guide_step--;
+		if($scope.guide_step==0)
+			spSCNavStateManager.unregisterForms(Object.keys(includedGformInstances));
+		if ($scope.guide_step === 1) {
+			addCabrilloBottomButtons({
+				title: [$scope.data.msgs.prevMsg, $scope.data.msgs.nextMsg],
+				fn: [$scope.goPrev, $scope.goNext]
+			});
+		}
+	}
+	$scope.goNext = function(timeout) {
+		var gForm;
+		if($scope.guide_step == 0) {
+			$scope.$evalAsync(function () {
+				gForm = includedGformInstances[$scope.data.sys_id];
+				if (!spScUtil.isServerValidationDone($scope.data.sc_cat_item._fields))
+					$scope.validating = true;
+				else if (gForm &amp;&amp; !gForm.submit()) {
+					timeout = timeout || 2000;
+					if ($scope.data.isMEE)
+						openItemWithInvalidFields();
+					$timeout(function () {
+                        $scope.$broadcast('$sp.service_catalog.form_submit_failed', {
+                            action_name: 'submit'
+                        });
+					}, timeout);
+				}
+			});
+        } else if ($scope.guide_step == 1) {
+			$scope.itemsIncluded = $scope.includedItems.length;
+			$scope.includedItemsCounter = 0;
+			$scope.includedItems.forEach(function(item) {includedGformInstances[item.sys_id].$private.processed = false;});
+			$scope.$evalAsync(function () {
+				for (var i = 0; i &lt; $scope.includedItems.length; i++) {
+					if ($scope.includedItems[i].included) {
+						$scope.includedItemsCounter++;
+						var g_form = includedGformInstances[$scope.includedItems[i].sys_id];
+						g_form.$private.processed = false;
+						if (!spScUtil.isServerValidationDone($scope.includedItems[i]._fields))
+							$scope.validating = true;
+						else if (g_form &amp;&amp; !g_form.submit()) {
+							timeout = timeout || 1000;
+							$timeout(function (itemCounter) {
+								$scope.$broadcast('$sp.service_catalog.form_submit_failed', {
+                                    action_name: 'submit'
+                                });
+								openItemWithInvalidFields(itemCounter);
+							}.bind(null, $scope.includedItemsCounter), timeout); 
+						}
+          } else
+							$scope.itemsIncluded--;
+				}
+			});
+		}
+	}
+	$scope.toggleItemState = function(item) {
+		if (item.included) {
+			$scope.totalIncluded--;
+			angular.element('#item_details_' + item.sys_id).find('a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]').attr('tabindex', -1);
+        } else {
+			$scope.totalIncluded++;
+			angular.element('#item_details_' + item.sys_id).find('a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, object, embed, *[tabindex], *[contenteditable]').removeAttr('tabindex');
+		}
+		$scope.requested_for_variable_count += getRequestedForVariableCountDiff(item);
+	}
+
+	function getRequestedForVariableCountDiff(item) {
+		if (!item.has_requested_for_variable)
+			return 0;
+		return item.included ? -1 : 1;
+	}
+
+	function processChooseOptions() {
+		var canSubmit = true;
+		for (var i = 0; i &lt; $scope.includedItems.length; i++) {
+			if ($scope.includedItems[i].included) {
+				var gForm = includedGformInstances[$scope.includedItems[i].sys_id];
+				if (gForm &amp;&amp; !gForm.$private.processed) {
+					canSubmit = false;
+					break;
+				}
+			}
+		}
+		if(canSubmit) {
+			evalGuidePrice();
+			spSCNavStateManager.unregisterForms(Object.keys(includedGformInstances));
+            $scope.$broadcast('$sp.service_catalog.form_submitted', {
+                action_name: 'submit'
+            });
+			$scope.guide_step = 2;
+			$scope.showAddToCart = $scope.options.show_add_cart_button == 'true' &amp;&amp; !$scope.data.sc_cat_item.no_cart;
+			addCabrilloBottomButtons({
+				title: [i18n.getMessage('Add to Cart'), $scope.submitButtonMsg],
+				fn: [$scope.triggerAddToCart, $scope.triggerSubmit]
+			});
+		}
+	}
+
+    var sendMessageAfterAllItemsAreLoaded = (function() {
+        var formsIncluded = 0;
+        return function() {
+            formsIncluded++;
+            if (formsIncluded == $scope.includedItems.length) {
+               spAriaUtil.sendLiveMessage($scope.m.chooseOptionsOpenedMsg);
+               formsIncluded = 0;
+           }
+        }
+    })();
+	
+	var openItemWithInvalidFields = function(itemCounter) {
+			if (itemCounter == $scope.itemsIncluded) {			
+				var someFormIsInvalid = false;
+				for (var i=0; i &lt; $scope.includedItems.length; i++) {
+					if ($scope.includedItems[i].included) {
+						var gForm = includedGformInstances[$scope.includedItems[i].sys_id];
+						if (!gForm)
+							return;
+						var fields = gForm.getFieldNames();
+						for (var j=0; j&lt;fields.length; j++) {
+							var field = gForm.getField(fields[j]);
+							if (field.isInvalid) {
+								if ($scope.data.isMEE) {
+									$rootScope.$broadcast('spModel.view.render', $scope.includedItems[i].sys_id, function(){$timeout(function(){gForm.submit()})});
+									$scope.includedItems[i].isOpen = true;
+									$scope.showCancel($scope.includedItems[i].sys_id);
+                                } else
+									$scope.includedItems[i].isOpen = true;
+								someFormIsInvalid = true;
+								break;
+							}					
+						}
+						if ($scope.data.isMEE &amp;&amp; someFormIsInvalid)
+							break;
+					}
+				}
+				if (!$scope.data.isMEE)
+					focusInvalidField();	
+			}
+		}
+	
+	function focusInvalidField(){     
+		$timeout(function() {
+			for (var i = 0; i &lt; $scope.includedItems.length; i++) {
+				if ($scope.includedItems[i].included) {
+					var mandatory = $scope.includedItems[i]._mandatory;
+					if (mandatory &amp;&amp; mandatory.length &gt; 0) {
+						var elems = angular.element("[name*='" + mandatory[0].name + "']");
+						if (elems &amp;&amp; elems.length &gt; 0) //set focus the first element
+							elems[0].focus();
+						break;
+					} else {
+						var gForm = includedGformInstances[$scope.includedItems[i].sys_id];
+						getInvalidFields(gForm);
+						var invalidFields = gForm._invalidFields;
+						if (invalidFields &amp;&amp; invalidFields.length &gt; 0) {
+							var invalid = angular.element("[name*='" + invalidFields[0].name + "']");
+							if (invalid &amp;&amp; invalid.length &gt; 0) //set focus the first element
+								invalid[0].focus();
+							break;
+						}
+					}
+				}
+			}
+		}, 500);
+	}
+	$scope.closeItemAccordion = function (itemOpened) {
+		itemOpened.isOpen = false;
+		cabrillo.viewLayout.setNavigationBarButtons();
+		cabrillo.viewLayout.setTitle($scope.data.sc_cat_item.name);
+		addCabrilloBottomButtons({
+			title: [$scope.data.msgs.prevMsg, $scope.data.msgs.nextMsg],
+			fn: [$scope.goPrev, $scope.goNext]
+		});
+		$scope.isItemOpened = false;
+	}
+	$scope.showItem = function(index) {
+		if($scope.itemShown == index)
+			$scope.itemShown = -1;
+		else
+			$scope.itemShown = index;
+	}
+	$scope.showCancel = function(id) {
+		var itemOpened, buttons;
+		if ($scope.data.isMEE) {
+			clearCabrilloBottomButtons();
+			cabrillo.viewLayout.setNavigationBarButtons();
+			cabrillo.viewLayout.hideBackButton();
+			itemOpened = $scope.includedItems.find(function (item) {
+				return item.sys_id === id;
+			});
+			cabrillo.viewLayout.setTitle(itemOpened.name);
+            buttons = [{
+					title: i18n.getMessage('Done'),
+					enabled: true
+            }];
+			cabrillo.viewLayout.setNavigationBarButtons(buttons, function(index) {
+				$scope.closeItemAccordion(itemOpened);
+			});
+		}
+		$scope.isItemOpened = true;
+	}
+	/********************************************************************************************/
+	/********************************     Guide Navigation End    *******************************/
+	/*****###############################################################################********/
+	/********************************************************************************************/
+	/********************************         Attachments         *******************************/
+	/*****###############################################################################********/
+	function initAttachmentHandlers() {
+		var setAttachments;
+		var appendError = function (error) {
+			spUtil.addErrorMessage(error.msg + error.fileName);
+		};
+		for (var i = 0; i &lt; $scope.includedItems.length; i++) {
+			$scope.includedItems[i].attachmentHandler = new nowAttachmentHandler(setAttachments, appendError);
+			$scope.includedItems[i].attachmentHandler.setParams($scope.includedItems[i].targetTable, $scope.includedItems[i].sysparm_item_guid, 1024 * 1024 * $scope.data.maxAttachmentSize);
+		}
+	}
+	
+	$scope.uploadAttachments = function(item, files) {
+		spAttachmentUpload.uploadAttachments(item.attachmentHandler, files);
+	};
+	
+	$scope.$on('dialog.upload_too_large.show', function(e){
+		$log.error($scope.m.largeAttachmentMsg);
+		spUtil.addErrorMessage($scope.m.largeAttachmentMsg);
+	});
+	$scope.initAttachmentCallbacks = function (itemIndex) {
+		$scope.includedItems[itemIndex].attachmentHandler.setAttachments = function (attachments, action) {
+			$scope.includedItems[itemIndex].attachments = attachments;
+			if (action === "added") {
+				$scope.includedItems[itemIndex].attachment_submitted = true;
+			}
+			if (action === "renamed")
+				spAriaUtil.sendLiveMessage($scope.m.renameSuccessMsg);
+			if (action === "deleted") {
+				spAriaUtil.sendLiveMessage($scope.m.deleteSuccessMsg);
+				if ($scope.includedItems[itemIndex].attachments.length == 0)
+					$scope.includedItems[itemIndex].attachment_submitted = false;
+			}
+			$scope.includedItems[itemIndex].attachment_action_in_progress = false;
+            spUtil.get($scope, {
+                action: "from_attachment"
+            });
+		};
+		$scope.includedItems[itemIndex].confirmDeleteAttachment = function(attachment) {
+			spModal.confirm($scope.data.msgs.delete_attachment).then(function() {
+				$scope.includedItems[itemIndex].attachmentHandler.deleteAttachment(attachment);
+				$scope.includedItems[itemIndex].attachment_action_in_progress = true;
+				$scope.setFocusToAttachmentButton();
+			});
+		}
+	}
+	/********************************************************************************************/
+	/********************************       Attachments  End      *******************************/
+	/*****###############################################################################********/
+	/********************************************************************************************/
+	/********************************        UTIL Functions       *******************************/
+	/*****###############################################################################********/
+	function evalGuidePrice() {
+		$scope.price = 0;
+		var frequencyMap = {};
+		for (var i = 0; i &lt; $scope.includedItems.length; i++) {
+			if ($scope.includedItems[i].included &amp;&amp; $scope.includedItems[i].process_price) { 
+				var qty = parseInt($scope.includedItems[i].quantity);
+				var pricing = $scope.includedItems[i]._pricing;
+				var effectivePrice = 0;
+				var effectiveRecurringPrice = 0;
+				if (typeof $scope.includedItems[i].price != "undefined") {
+					effectivePrice = $scope.includedItems[i].price;
+				}
+				if (typeof $scope.includedItems[i].recurring_price != "undefined") {
+					effectiveRecurringPrice = $scope.includedItems[i].recurring_price;
+				}
+				if (effectiveRecurringPrice &gt;= 0 &amp;&amp; pricing.rfd) {
+					if(frequencyMap[pricing.rfd])
+						frequencyMap[pricing.rfd] += effectiveRecurringPrice * qty;
+					else
+						frequencyMap[pricing.rfd] = effectiveRecurringPrice * qty;
+				}
+				if (effectivePrice &gt;= 0)
+					$scope.price += effectivePrice * qty;
+			}
+		}
+		frequencyMap.price = $scope.price;
+		$scope.server.get({
+			action: "format_prices",
+			prices: frequencyMap
+		}).then(function(response) {
+			$scope.frequencySequence = response.data.frequencySequence;
+			$scope.price_display = response.data.frequencyMap.price;
+			$scope.frequencyMap = response.data.frequencyMap;
+		});
+	}
+	
+	function evalIncludes() {
+		// don't allow submit while waiting on included items eval
+		$scope.evaluatingIncludes = true;
+		$scope.includedItems = [];
+		var guideData = getFieldsData($scope.data.sc_cat_item);
+		guideData.sysparm_id = $scope.data.sys_id;
+		guideData.without_cart = true;
+		guideData._fields = $scope.data.sc_cat_item._fields;
+		guideData.cascade = $scope.data.sc_cat_item.cascade;
+		guideData.has_requested_for_variable = $scope.data.sc_cat_item.has_requested_for_variable;
+		if ($scope.data.workspaceParams) {
+			guideData.sysparm_parent_sys_id = $scope.data.workspaceParams.sysparm_parent_sys_id;
+			guideData.sysparm_parent_table = $scope.data.workspaceParams.sysparm_parent_table;
+		}
+		$scope.server.get({
+			action: "init_guide",
+            	orderGuideData: guideData,
+		options: c.options
+		}).then(function(response) {
+			if (response.data.error) {
+				$scope.guide_step--;
+				return;
+			}
+            var itemGlobalData = response.data.itemGlobalData;
+            var includedItems = itemGlobalData.items;
+            var massageItemWithGlobalDataFn = getDataTransferFunction(itemGlobalData);
+            includedItems.forEach(function(item) {
+				item.trusted_description = $sce.trustAsHtml(item.description);
+                massageItemWithGlobalDataFn(item);
+				var _val = false;
+				Object.defineProperty(item, 'isOpen', {
+                    get: function() {
+                        return _val;
+                    },
+					set: function(val) {
+						_val = val;
+						if (val)
+							$rootScope.$broadcast('spModel.view.render', item.sys_id);
+					}
+				});
+			});
+            $scope.includedItems = includedItems;
+            $scope.requested_for_variable_count = response.data.requested_for_variable_count;
+            $scope.showIncludeToggle = response.data.showIncludeToggle;
+            initAttachmentHandlers();
+			$scope.totalIncluded = $scope.includedItems.length;
+			$scope.conflictingCartDomainMsg = response.data.conflictingCartDomainMsg;
+			$scope.evaluatingIncludes = false;
+			$scope.guide_requested_for = response.data.guide_requested_for;
+			addCabrilloBottomButtons({
+				title: [$scope.data.msgs.prevMsg, $scope.data.msgs.nextMsg],
+				fn: [$scope.goPrev, $scope.goNext]
+			});
+		});
+	}
+	
+    function getDataTransferFunction(itemGlobalData) {
+        return (function(item) {
+            //populate ui policies
+            item.policy = getObjectsArrayFromIdArray(item.policy, itemGlobalData.ui_policies) || [];
+            //populate ui scripts
+            item.ui_scripts = itemGlobalData.ui_scripts || [];
+            //populate client scripts
+            if (item.client_script) {
+                item.client_script.onLoad = getObjectsArrayFromIdArray(item.client_script.onLoad, itemGlobalData.client_scripts) || [];
+                item.client_script.onChange = getObjectsArrayFromIdArray(item.client_script.onChange, itemGlobalData.client_scripts) || [];
+                item.client_script.onSubmit = getObjectsArrayFromIdArray(item.client_script.onSubmit, itemGlobalData.client_scripts) || [];
+            }
+        });
+    }
+
+    function getObjectsArrayFromIdArray(idArray, globalObjectHolder) {
+        var objectsArray = [];
+        for (var i in idArray)
+            objectsArray.push(globalObjectHolder[idArray[i]]);
+        return objectsArray;
+    }
+
+	function getInvalidFields(gForm) {
+		gForm._invalidFields = [];
+		var fields = gForm.getFieldNames();
+		for (var j = 0; j &lt; fields.length; j++) {
+			var field = gForm.getField(fields[j]);
+			if (field.isInvalid)
+				gForm._invalidFields.push(field);
+		}
+	}	
+	
+	function getCurrentGForm() {
+		if ($scope.guide_step == 0)
+			return includedGformInstances[$scope.data.sc_cat_item.sys_id];
+		else {
+			var openItem = $scope.includedItems.find(function(item){
+				return item.isOpen === true;
+			});
+			return includedGformInstances[openItem.sys_id];
+		}
+	}
+	
+	function openItemHelper(item, state, defer) {
+		for (var i = 0; i &lt; $scope.includedItems.length; i++)
+			if ($scope.includedItems[i].sys_id == item) {
+				$scope.includedItems[i].included = state == 'true';
+				$scope.includedItems[i].isOpen = true;
+				$scope._atf.expose('g_form', spAtf.augmentForm(includedGformInstances[item]));
+				defer.resolve();
+			}
+	}
+
+	function getFieldsData(item) {
+        var fieldData = {
+            "variables": {}
+        };
+		for(var field in item._fields) {
+			var fieldValue = "";
+			if (item._fields[field].value != null &amp;&amp; typeof item._fields[field].value != "string")
+				fieldValue = JSON.stringify(item._fields[field].value);
+			else
+				fieldValue = item._fields[field].value;
+			fieldData.variables[item._fields[field].name] = fieldValue;
+		}
+		return fieldData;
+	}
+
+	function getGuideItems(cartname) {
+		var items = [];
+		var item;
+		for(var i = 0; i &lt; $scope.includedItems.length; i++) {
+			if($scope.includedItems[i].included) {
+				item = getFieldsData($scope.includedItems[i]);
+				item.sysparm_id = item.sysparm_active = $scope.includedItems[i].sys_id;
+				item.sysparm_quantity = $scope.includedItems[i].quantity;
+				item.sysparm_cart_name = cartname;
+				item.sysparm_item_guid = $scope.includedItems[i].sysparm_item_guid;
+				items.push(item);
+			}
+		}
+		return items;
+	}
+	/*********************************************************************************************/
+	/********************************          UTIL Functions End           **********************/
+	/*****################################################################################********/
+	/*********************************************************************************************/
+	/********************************           Submit Handlers             **********************/
+	/*****################################################################################********/
+	$scope.triggerAddToCart = function() {
+		var webAnalyticsMsgSuffix = $scope.data.isMEE ? " - NOW Mobile" : "";
+		clearCabrilloBottomButtons();
+		if($scope.conflictingCartDomainMsg) {
+			spUtil.addErrorMessage($scope.conflictingCartDomainMsg);
+			return;
+		}
+		if($scope.submitted)
+			return;
+		$scope.server.get({
+			action: 'log_request_cart',
+            itemDetails: {
+                sys_id: $scope.data.sc_cat_item.sys_id,
+										name: $scope.data.sc_cat_item.name,
+                sys_class_name: $scope.data.sc_cat_item.sys_class_name
+            }
+		});
+		$scope.submitted = true;
+		$scope.server.get({
+			action: "add_to_cart",
+			items: getGuideItems(""),
+			sys_id: $scope.data.sys_id,
+			guide_requested_for: $scope.guide_requested_for
+		}).then(function(response) {
+			$rootScope.$broadcast("$sp.service_catalog.cart.add_item");
+			$rootScope.$broadcast("$sp.service_catalog.cart.update");
+			$scope.$emit("$sp.sc_order_guide.add_to_cart");
+			window.GlideWebAnalytics.trackEvent('Service Catalog', 'Catalog Cart' + webAnalyticsMsgSuffix, 'Order Guide Added to Cart', 0, 0);
+			if ($scope.data.isMEE) {
+				$scope.submitted = true;
+				cabrillo.message.showMessage(cabrillo.message.SUCCESS_MESSAGE_STYLE, i18n.getMessage('Items have been added successfully to your cart'));
+				$timeout(function () {
+					cabrillo.flowControl.flowEnded();
+					return;
+				}, 200);
+				return;
+			}
+			spModal.open({
+				message: i18n.getMessage('Items have been added successfully'),
+				size: 'sm',
+				backdrop: 'static',
+				keyboard: false,
+				noDismiss: true,
+                buttons: [{
+                        label: i18n.getMessage('Catalog Home'),
+                        cancel: true
+                    },
+                    {
+                        label: i18n.getMessage('View Cart'),
+                        primary: true
+                    }
+				]
+			}).then(function() {
+				$location.search("id=sc_cart");
+			}, function() {
+				$location.search("id=sc_home");
+			});
+		}, function(error) {
+				spUtil.addErrorMessage(error);
+				return;
+		});
+	}
+	// order / create request
+	$scope.triggerSubmit = function() {
+		clearCabrilloBottomButtons();
+		if ($scope.submitted)
+			return;
+		$scope.submitted = true;
+		var hasItems = $scope.includedItems.filter(function(item) {
+			return item.sys_class_name != 'sc_cat_item_producer';
+		}).length &gt; 0;
+		$scope.showOrderConfirmation = showOrderConfirmation();
+		if ($scope.showOrderConfirmation) {
+			var requested_for_id = "";
+			var requested_for_display = "";
+			if ($scope.data.requested_for &amp;&amp; $scope.data.requested_for.id &amp;&amp; $scope.data.requested_for.displayValue) {
+				requested_for_id = $scope.data.requested_for.id;
+				requested_for_display = $scope.data.requested_for.displayValue;
+			}
+			//Required to pass as payload for usage as embeddedWidget
+			var embeddedWidgetOptions = {
+				"auto_redirect" : "true",
+				"requested_for_id" : requested_for_id,
+				"requested_for_display" : requested_for_display
+			};
+			var payload = {
+				cart: '' + $scope.data.sys_id,
+				itemDetails: {
+					items: getGuideItems('' + $scope.data.sys_id),
+					request_method: $scope.data.sc_cat_item.request_method,
+					sys_id: $scope.data.sc_cat_item.sys_id, 
+					name: $scope.data.sc_cat_item.name,
+					sys_class_name: $scope.data.sc_cat_item.sys_class_name
+				},
+				workspaceParams: $scope.data.workspaceParams,
+				action: "order_guide"
+			};
+			for (var embeddedOption in embeddedWidgetOptions) {
+				payload[embeddedOption] = c.options[embeddedOption] || embeddedWidgetOptions[embeddedOption];
+			}
+			$scope.server.get(payload).then(function(response) {
+				var orderGuideModalCtrl;
+				var unregister = $scope.$on('$sp.service_catalog.cart.cancel_order', function(){
+					orderGuideModalCtrl.close();
+					$scope.submitted = false;
+					$timeout(function () {
+						addCabrilloBottomButtons({
+							title: [i18n.getMessage('Add to Cart'), $scope.submitButtonMsg],
+							fn: [$scope.triggerAddToCart, $scope.triggerSubmit]
+						});
+					});
+				});
+				var closeModalOnSubmit = $scope.$on("$sp.service_catalog.cart.submitted", function () {
+					orderGuideModalCtrl.close();
+					$scope.submitted = true;
+				});
+				var orderGuideModal = angular.copy(response.data.orderGuideModal);
+				orderGuideModal.options.afterOpen = function(ctrl){
+					orderGuideModalCtrl = ctrl;
+				};
+				orderGuideModal.options.afterClose = function() {
+					unregister();
+					closeModalOnSubmit();
+					$scope.orderGuideModal = null;
+					orderGuideModalCtrl = null;
+				};
+				$scope.orderGuideModal = orderGuideModal;
+			});
+			return $scope.submitted;
+		} else {
+			if ($scope.data.isMEE)
+				cabrillo.viewLayout.showSpinner();
+			$scope.data.action = 'checkout_guide';
+			$scope.data.guideItems = getGuideItems('' + $scope.data.sys_id);
+			$scope.data.guide_requested_for = $scope.guide_requested_for;
+			$scope.server.update().then(function(response) {
+				$scope.data.action = undefined;
+				$scope.data.guideItems = undefined;
+                appendOrderNowOutputParams($scope.data.result);
+				$scope.$emit("$sp.sc_order_guide.submitted", $scope.data.result);
+				window.GlideWebAnalytics.trackEvent('Service Catalog' + webAnalyticsMsgSuffix, 'Order Guide Request', 'Catalog Request Submitted', $scope.includedItemsCounter, 0);
+				$scope.submitted = true;
+				hideSpinner();
+				if ($scope.options.auto_redirect == 'false') {
+					spUtil.addInfoMessage($scope.m.requestSubmitted);
+					return;
+                } else {
+					if ($scope.data.result.request_id) 
+						$location.search('id=sc_request&amp;is_new_order=true&amp;table=sc_request&amp;sys_id=' + $scope.data.result.request_id);
+					else 
+						$location.search('id=requests&amp;is_new_order=true');
+				}
+			}, function(error) {
+				hideSpinner();
+				spUtil.addErrorMessage(error);
+				return;
+			});
+			return $scope.submitted;
+		}
+	}
+
+	function showOrderConfirmation() {
+		return $scope.data.sys_properties.twostep &amp;&amp; $scope.data.sc_cat_item.request_method != "submit" &amp;&amp;
+            !$scope.data.sc_cat_item.has_requested_for_variable &amp;&amp; $scope.requested_for_variable_count !== $scope.totalIncluded;
+	}
+	
+	function hideSpinner() {
+		if ($scope.data.isMEE)
+			cabrillo.viewLayout.hideSpinner();
+	}
+	
+	//If its a two step process, ordernow will return sys_id, number and table. In case of checkout,  
+	//If the cart has one producer, output would contain sys_id, number and table. But in case of cat items,  sys_id, number, table
+	//would be empty. 
+	//Making the output consitent between the above three cases.
+    function appendOrderNowOutputParams(output) {
+            output.sys_id = output.sys_id || output.request_id;
+            output.number = output.number || output.request_number;
+            output.table = output.table || 'sc_request';
+	}
+	/*********************************************************************************************/
+	/********************************        Submit Handlers End           ***********************/
+	/*****################################################################################********/
+	var catalogUtil = {
+		updateGform: function() {
+			var g_form = getCurrentGForm();
+			if (g_form)
+				$scope._atf.expose('g_form', spAtf.augmentForm(g_form));
+		},
+		addRow: function(fieldId, timeoutInMS) {
+			var deferred = $q.defer();
+			var g_form = getCurrentGForm();
+			if (g_form) {
+				if (timeoutInMS &lt;= 0)
+					timeoutInMS = 1000;
+				$scope.$broadcast("$sp.sc_multi_row.create_row", fieldId, g_form.getSysId());
+				$scope.$on('spModel.gForm.initialized', function(e, gFormInstance) {
+					if (gFormInstance.getSysId() == fieldId)
+						deferred.resolve();
+				});
+				$timeout(function() {
+					deferred.reject();
+				}, timeoutInMS);
+            } else
+				deferred.reject();
+			return deferred.promise;
+		},
+		navigateToStep: function(num, timeout) {
+			var defer = $q.defer();
+			var step = parseInt(num) - 1;
+			if (Math.abs(step - $scope.guide_step) != 1) {
+				defer.reject("Can't navigate to next step");
+				return defer.promise;
+			}
+			if (step &gt; $scope.guide_step)
+				$scope.goNext(timeout);
+			else {
+				$scope.goPrev();
+				defer.resolve();
+			}
+			var cleanup = $scope.$on('$sp.service_catalog.form_submit_failed', function() {
+				cleanup();
+				defer.reject("Can't navigate to next step");
+			});
+			var cleanup1 = $scope.$on('$sp.service_catalog.form_submitted', function() {
+				cleanup1();
+				defer.resolve("Can navigate to next step");
+			});
+			return defer.promise;
+		},
+		validateIncludedList: function(list, stage) {
+			var items = list.split(',').reduce(function(obj, item) {
+				obj[item] = false;
+				return obj;
+			}, {});
+			var included = stage == 1 ? $scope.includedItems : $scope.includedItems.filter(function(item) {
+				return item.included == true;
+			});
+			if (Object.keys(items).length != included.length)
+				return false;
+			for (var i = 0; i &lt; included.length; i++)
+				if (!items.hasOwnProperty(included[i].sys_id))
+					return false;
+			return true;
+		},
+		openItem: function(item, state, timeoutInMS) {
+			if (timeoutInMS &lt;= 0)
+				timeoutInMS = 10000;
+			var defer = $q.defer();
+			if (includedGformInstances[item]) {
+				openItemHelper(item, state, defer);
+			}
+			$scope.$on('spModel.gForm.initialized', function(e, gFormInstance) {
+				if (gFormInstance.getSysId() == item) {
+					openItemHelper(item, state, defer);
+				}
+			});
+			$timeout(function() {
+				defer.reject();
+			}, timeoutInMS);
+			return defer.promise;
+		},
+		getPrice: function() {
+			var res = {};
+			var item = $scope.includedItems.find(function(itemData) {
+				return itemData.isOpen == true;
+			});
+			if (item) {
+				res.price = item.price;
+				res.recurring_price = item.recurring_price;
+				res.recurring_frequency = item.recurring_frequency;
+			}
+			return res;
+		},
+		getGuidePrice: function() {
+			return $scope.price_display;
+		},
+		addToCart: function() {
+			var defer = $q.defer();
+			if ($scope.guide_step == 2)
+				$scope.triggerAddToCart();
+			if (!$scope.submitted)
+				defer.reject("Can't submit form.");
+			else
+				defer.resolve();
+			return defer.promise;
+		},
+		submitOrderGuide: function() {
+			var defer = $q.defer();
+			if ($scope.guide_step == 2 &amp;&amp; $scope.triggerSubmit()) {
+				if ($scope.showOrderConfirmation)
+					defer.resolve();
+				else {
+					var cleanUp = $scope.$on('$sp.sc_order_guide.submitted', function(o, result) {
+						$timeout(function() {
+							cleanUp();
+							result.single_step = true;
+							defer.resolve(result);
+						}, 10);
+					});
+				}
+			} else
+				defer.reject();
+			return defer.promise;
+		}
+	};
+	/********************************************************************************************/
+	/********************************                ATF End            *************************/
+	/*****###############################################################################********/
+	/********************************************************************************************/
+	/********************************            Cabrillo Start         *************************/
+	/*****###############################################################################********/
+	function clearCabrilloBottomButtons() {
+		if ($scope.data.isMEE) {
+			cabrillo.viewLayout.setBottomButtons();
+		}
+	}
+
+	function showCabrilloBottomButtons() {
+		if (!$scope.data.isMEE) return;
+		if ($scope.guide_step === 0) {
+			addCabrilloBottomButtons({
+				title: [$scope.data.msgs.nextMsg],
+				fn: [$scope.goNext]
+			});
+		}
+		if ($scope.guide_step === 1) {
+			var itemOpened = $scope.includedItems.find(function (item) {
+				return item.isOpen;
+			});
+			if (itemOpened) {
+				$scope.showCancel(itemOpened.sys_id);
+			}
+		}
+	}
+	
+	function addCabrilloBottomButtons(buttonDetails) {
+		if ($scope.data.isMEE) {
+			var buttons = [];
+			clearCabrilloBottomButtons();
+			switch($scope.guide_step) {
+				case 0:
+                    buttons = [{
+							title: buttonDetails.title[0],
+							enabled: true,
+							backgroundColor: $scope.data.sys_properties.mobileNativeColor,
+							textColor: '#FFFFFF'
+						}];
+					cabrillo.viewLayout.setBottomButtons(buttons, function(buttonIndex) {
+						buttonDetails.fn[buttonIndex]();
+					});
+					cabrillo.viewLayout.showBackButton();
+					break;
+				case 1:
+                    buttons = [{
+							title: buttonDetails.title[0],
+							enabled: true,
+							backgroundColor: '#f7f7f7',
+							textColor: '#000000'
+						},
+						{
+							title: buttonDetails.title[1],
+							enabled: true,
+							backgroundColor: $scope.data.sys_properties.mobileNativeColor,
+							textColor: '#FFFFFF'
+                        }
+                    ];
+					cabrillo.viewLayout.setBottomButtons(buttons, function(buttonIndex) {
+						//Disable next button in choose option if all the items are marked as not included.
+						// however the previous button should still work
+						if (!($scope.submitted || $scope.totalIncluded &lt;= 0) || buttonIndex === 0) {
+							buttonDetails.fn[buttonIndex]();
+						}
+					});
+					cabrillo.viewLayout.hideBackButton();
+					break;
+				case 2:
+					if ($scope.data.sys_properties.cartEnabled &amp;&amp; $scope.showAddToCart) {
+                        buttons = [{
+								title: buttonDetails.title[0],
+								enabled: true,
+								backgroundColor: '#f7f7f7',
+								textColor: '#000000'
+							},
+							{
+								title: buttonDetails.title[1],
+								enabled: true,
+								backgroundColor: $scope.data.sys_properties.mobileNativeColor,
+								textColor: '#FFFFFF'
+                            }
+                        ];
+						cabrillo.viewLayout.setBottomButtons(buttons, function(buttonIndex) {
+							buttonDetails.fn[buttonIndex]();
+						});
+					} else {
+                        buttons = [{
+								title: buttonDetails.title[1],
+								enabled: true,
+								backgroundColor: $scope.data.sys_properties.mobileNativeColor,
+								textColor: '#FFFFFF'
+							}];
+						cabrillo.viewLayout.setBottomButtons(buttons, function(buttonIndex) {
+							buttonDetails.fn[1]();
+						});
+					}
+					cabrillo.viewLayout.hideBackButton();
+					break;
+			}
+		}
+	}
+	var mespOpenPopupUnregister = $rootScope.$on("mesp.popup.open", function() {
+		// Timeout is to give a better user experience otherwise when this popup opens,
+		// the cabrillo buttons will be displayed immediately giving a bad user experience.
+		$timeout(function(){
+			clearCabrilloBottomButtons();
+		});
+	});
+	var mespClosePopupUnregister = $rootScope.$on("mesp.popup.close", function() {
+		// Timeout is to give a better user experience otherwise when this popup opens,
+		// the cabrillo buttons will be displayed immediately giving a bad user experience.
+		$timeout(function(){
+			showCabrilloBottomButtons();
+		});
+	});
+	
+	$window.onpageshow = function(){
+		if(c.isNative)
+			$scope.$emit('spModel.gForm.showNativeMobileButtons');
+	};
+	/**********************************************************************************************/
+	/********************************            Cabrillo End           ****************************/
+	/*****##################################################################################********/
+}]]&gt;&lt;/client_script&gt;&lt;controller_as&gt;c&lt;/controller_as&gt;&lt;css&gt;.order-guide-mobile {
+  border: 0;
+  box-shadow: none;
+  
+  .mobile-attachment-label {
+    float: none;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    button, .add-attachment-content {
+      color: $link-color;
+    }
+  }
+  
+  .mobile-summary{
+  	display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  
+  .iconlink {
+  	padding: 0 !important;
+    width: 100%;
+    span.step-text {
+      font-weight: bold;
+      font-size: 20px;
+      margin: 0 !important;
+      top: 0;
+      padding-left: 5px;
+    }
+  }
+  
+  .less-text .read-more,
+  .more-text .read-less {
+    display: block;
+    text-align: center;
+    margin: 10px auto;
+  }
+  
+  .list-group-mobile {
+		.accordion-header {
+      &amp;amp;.disable-row .accordion-toggle {
+        pointer-events: none;
+        color: $gull-grey;
+      }
+
+      .accordion-toggle {
+        &amp;amp;:focus {
+        	border: 0;
+          box-shadow: none;
+        }
+        
+        .row {
+          padding: 20px 0;
+          margin: 0 !important;
+          &amp;amp;&amp;gt;div {
+          	padding: 0;
+          }
+        }
+        
+        .og-check-bucket {
+          display: block;
+          padding-left: 10px;
+          height: 20px;
+          width: 60px;
+
+          input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+          }
+
+          .og-check {
+            position: absolute;
+            pointer-events: auto;
+            top: -3px;
+            height: 30px;
+            width: 30px;
+            background-color: #fff;
+            border: 1px solid $mesp-input-border;
+            border-radius: 50%;
+
+            &amp;amp;:after {
+              content: "";
+              position: absolute;
+              display: none;
+              left: 12px;
+              top: 8px;
+              width: 5px;
+              height: 10px;
+              border: solid #fff;
+              border-width: 0 2px 2px 0;
+              -webkit-transform: rotate(45deg);
+              -ms-transform: rotate(45deg);
+              transform: rotate(45deg);
+            }
+          }
+
+          input:checked ~ .og-check {
+            background-color: $mesp-input-radio;
+            &amp;amp;:after {
+              display: block;
+            }
+          }
+        }
+
+        .og-mobile-item {
+          display: grid;
+          grid-template-columns: auto 100px;
+					
+          .item-name {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            
+            &amp;amp; ~ label {
+            	justify-self: end;
+            }
+          }
+          
+          .options {
+          	color: $gull-grey;
+          }
+          
+          .accordion-icon {
+            margin-left: 12px;
+            padding-right: 3px;
+
+            &amp;amp;:before {
+              content: "\f105";
+              font-family: FontAwesome;
+              font-size: 20px;
+            }
+          }
+        }
+      }
+
+      .collapsing {
+        transition: none;
+      }
+
+	    .panel-heading, .panel-heading:hover {
+        background-color: transparent;
+      }
+    }
+   
+    .guide-item-details-wrapper-mobile {      
+      position: fixed !important;
+      background-color: #FFF !important;
+      z-index: 1 !important;
+      height: 100% !important;
+      width: 100% !important;
+      top: 0 !important;
+      left: 0 !important;
+      overflow: scroll;
+      
+      .title-mobile {
+        font-size: 22px;
+        font-weight: 600;
+      }
+      
+      .og-item-price {
+        padding: 23px 0px 23px 14px;
+        margin: 18px -8px 0px -8px;
+        border-top: 1px solid $mesp-input-border;
+        strong {
+          font-size: 18px;
+        }
+        span {
+          font-size: 14px;
+        }
+        label {
+          display: block;
+          color: $gull-grey;
+        }
+      }
+    }
+    
+    .summary {
+      section {
+	      display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 5px 5px 5px 0;
+      }
+      
+      .guide-item {
+      	display: flex;
+        align-items: center;
+      }
+      
+      .guide-item-quantity {
+        padding: 5px 10px;
+        margin: 0 10px 0 0;
+        background-color: #F0F0F0;
+        border-radius: 5px;
+      }
+      
+      .guide-item-name {
+      	display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  }
+}
+
+.guide-item-details-wrapper {
+	position: relative;
+  background-color: #F8F9F9;
+}
+
+.empty-state-content {
+  margin-top: 30px;
+
+  h3 {
+    margin-bottom: 5px;
+    text-align: center;
+  }
+}
+
+.attachment-label {
+  float: right;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.guide-image {
+  max-height: 240px;
+  padding: 5px;
+  display: inline;
+}
+
+.panel-button {
+  float: none;
+}
+
+.file-list-wrap {
+	margin-bottom: 10px;
+}
+
+.guide-item-image {
+  max-height: 150px;
+  padding: 10px;
+  display: inline-block !important;
+}
+
+.item-icon {
+  max-width:100%;
+  height:auto;
+}
+
+.disabled-mask {
+  background-color: #F8F9F9;
+  position: absolute;
+  z-index: 8;
+  opacity: 0.6;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  border-radius: 5px;
+  cursor: not-allowed;
+}
+
+.guide-description, .guide-nav, .tab-item, .og-timeline {
+  overflow: auto;
+}
+
+
+.guide-nav {
+  padding: 0px 40px 20px 40px;
+}
+
+.guide-nav-setp1 {
+  padding-right: 27px;
+}
+
+.iconlink {
+  margin: 5px 0px 5px 0px;
+}
+
+.circle_icon {
+    border: 3px solid;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    padding: 20px;
+    display: inline-block;
+    .step-icon {
+      font-size: 20px;
+    	position: relative;
+    	top: -9px;
+    	left: -10px;
+    }
+}
+
+.step-text {
+  	position: relative;
+    top: -10px;
+}
+
+.step_active {
+  color: $primary;
+}
+
+.step_inactive {
+  color: $text-muted;
+  opacity: 0.5;
+}
+
+.accordion-header {
+  .panel-heading {
+    padding: 0;
+    .row {
+      padding: 15px;
+      margin: 0;
+    }
+    .align-text {
+      top: 3px;
+    }
+    &amp;amp;:hover {
+    	background-color: lighten($primary, 45%);
+  	}
+    label {
+      font-size: inherit;
+    }
+  }
+  &amp;amp;.panel-open {
+    .panel-heading {
+      border-bottom: 1px solid #dee5e7;
+      &amp;amp;:hover {
+    		background-color: transparent;
+  		}
+    }
+  }
+  .panel-title {
+    	font-size: inherit;
+  }
+}
+
+.list-group {
+	padding-left: 28px;
+  padding-right: 28px;
+  padding-top: 10px;
+  padding-bottom: 0px;
+}
+
+.accordion-icon {
+  margin-left: 30px;
+}
+
+
+.mandatory-header {
+  border-left: 3px #d9534f solid !important;
+}
+
+.mandatory-icon {
+  color: #d9534f;
+  margin-left: -9px
+}
+
+.timeline-container {
+  position: sticky;
+  position: -webkit-sticky;
+  position: -ms-sticky;
+  height:auto;
+  top: -($font-size-h2 + $font-size-base + 48px);
+  z-index: 10;
+  background-color: inherit;
+  border-radius: 4px 4px 0 0;
+}
+
+.og-timeline .iconlink label {
+  font-weight: 600;
+  font-size: 0.8em;
+  line-height: 1.8em;
+}
+
+.include-loader {
+  text-align: center;
+  
+}
+
+.og-switch {
+  .input-switch {
+    font-size: inherit;
+    label.switch {
+      border-radius: 20px;
+      &amp;amp;::before {
+        border-radius: 20px;
+      }
+    }
+    input[type=checkbox]:checked ~ .switch {
+    	background-color: $primary;
+		}
+  }
+}
+
+.summary {
+  tr {
+    height: 69px;
+  }
+  margin-bottom: 0;
+  .summary-excluded {
+    color: #ccc;
+  }
+  .not-included-pill {
+    color: #FFF;
+    background-color: #f0ad4e;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: bolder;
+    white-space: nowrap;
+  }
+}
+
+.m-r-6 {
+  margin-right: 6px !important;
+}
+
+.wrap-word {
+  word-break: break-word;
+  hyphens: auto;
+}
+
+//animation
+
+.fa-pulse {
+  -webkit-animation: fa-spin 1s infinite steps(8);
+  animation: fa-spin 1s infinite steps(8);
+}
+
+.options {
+  color: $primary;
+}
+
+@media all and (-ms-high-contrast: none), (-ms-high-contrast: active) {
+/* IE10+ CSS styles go here */
+   .timeline-container {
+   position: static;
+   top: 0px;
+   }
+}
+
+ .help-tag-icon {
+  	color: $sc-field-error-color;
+  }
+  
+@media only screen and (max-width:992px) {
+  .pull-left-xs {
+    float: left !important;
+  }
+  
+  .left-align-xs {
+    text-align: left !important;
+  }
+  
+  .padding-left-xs {
+    padding-left:15px !important;
+  }
+  
+  .iconlink {
+    padding: 0 15px;
+  }
+  
+  .wrapper-cart-xs {
+    padding: 10px !important;
+  }
+  
+  .not-included {
+    padding: 3px !important;
+  }
+  
+  .pull-right-xs {
+    float: right !important;
+  }
+  
+  .remove-margin-bottom-xs {
+    margin-bottom: 0px !important;
+  }
+  
+  .add-margin-bottom-xs {
+    margin-bottom: 15px !important;
+  }
+  
+  .list-group {
+    padding-left: 13px !important;
+    padding-right: 13px !important;
+  }
+
+  .border-top-xs {
+    border-top: none;
+  }
+  
+  .border-bottom-xs {
+    border-bottom: none;
+  }
+  
+  .button-image-xs {
+    padding-left: 7%;
+    line-height: 160%;
+  }
+  
+  .guide-image {
+    display: block;
+    margin: auto;
+    max-height: 220px
+  }
+  
+  .og-switch {
+    padding-top:10px;
+    .input-switch {
+      margin-left: 5px !important;
+    }
+    .input-switch input[type=checkbox]  ~ .switch {
+       height: 20px;
+       width: 35px
+    }
+    .input-switch input[type=checkbox]:checked  ~ .switch:before {
+      left: 15.5px;
+    }
+   }
+  .summary {
+     tr {
+         height: 33px;
+      }
+    .summary-excluded {
+    	color: inherit;
+  	}
+  }
+  .timeline-container {
+    top: -($font-size-h2 + $font-size-base + 28px);
+  }
+  .guide-nav-setp1 {
+    padding: 0 13px 20px 13px;
+  }
+	.timeline-container {
+     position: inherit;
+  }
+  .included-xs {
+    font-size:13px; 
+    vertical-align:3px;
+  }
+  .panel-body {
+    padding: 0;
+  }
+  .guide-item-image-xs {
+    max-height: 120px;
+  	padding: 10px;
+    float: left;
+  }
+  .guide-description {
+    display: inline;
+  }
+  .read-more, .read-less {
+    font-size: 15px;
+    cursor: pointer;
+  }
+  .more-text {
+    display: none;
+  }
+}&lt;/css&gt;&lt;data_table&gt;sp_instance&lt;/data_table&gt;&lt;demo_data&gt;{&amp;#13;
+"options": {&amp;#13;
+"sys_id": "6690750f4f7b4200086eeed18110c761"&amp;#13;
+}&amp;#13;
+}&lt;/demo_data&gt;&lt;description/&gt;&lt;docs/&gt;&lt;field_list&gt;color,title&lt;/field_list&gt;&lt;has_preview&gt;true&lt;/has_preview&gt;&lt;id/&gt;&lt;internal&gt;false&lt;/internal&gt;&lt;link&gt;&lt;![CDATA[function(scope, elem) {
+		scope.setFocusToAttachmentButton = function () {
+			elem.find('.sp-attachment-add')[0].focus();
+		}
+}]]&gt;&lt;/link&gt;&lt;name&gt;Copy of SC Order Guide&lt;/name&gt;&lt;option_schema&gt;[{"hint":"This property will 'show less' description of order guide with an option of 'read more' to read full description.","name":"show_less_orderguide","default_value":"true","section":"Presentation","label":"Enable Show More/Less for Order Guide description on Mobile","type":"boolean"},{"hint":"Show the widget in compact mode","name":"compact_mode","section":"Presentation","default_value":"false","label":"Compact Mode","type":"boolean"},{"hint":"Hide Delivery Time in each Item","name":"hide_delivery_time","section":"Presentation","default_value":"false","label":"Hide Delivery Time","type":"boolean"},{"hint":"Show the add to cart button","name":"show_add_cart_button","section":"Behavior","default_value":"true","label":"Show Add to Cart","type":"boolean"}]&lt;/option_schema&gt;&lt;public&gt;true&lt;/public&gt;&lt;roles/&gt;&lt;script&gt;&lt;![CDATA[(function () {
+	var guideJS;
+	data.isTwoStepEnabled = gs.getProperty('glide.sc.sp.twostep');
+	//For cascading, initialising the below vairiables
+	var variableClassToCascade = ["RequestedForQuestion"];
+	var guideVariableNameMap = {};
+	var guideVariableClassMap = {};
+	var localInput = input; //to safeguard pullution of "input" via BR or other scripts
+	
+	data.sys_id = $sp.getParameter("sys_id") || localInput.sys_id || options.sys_id;
+	data.engagement_channel = options.native_mobile ? 'mobile' : (options.isServiceWorkspace ? 'workspace' : 'sp');
+	data.referrer = $sp.getParameter("referrer");
+	
+	if (localInput &amp;&amp; localInput.action == "from_attachment")
+		return;
+	if (localInput &amp;&amp; localInput.action == "get_requested_for") {
+		data.requested_for = new global.GlobalServiceCatalogUtil().getRequestedFor(localInput.parentParams);
+		return;
+	}
+
+	['auto_redirect', 'requested_for_id', 'requested_for_display'].forEach(function (embeddedWidgetOption) {
+		if (localInput &amp;&amp; typeof localInput[embeddedWidgetOption] != 'undefined')
+			options[embeddedWidgetOption] = localInput[embeddedWidgetOption];
+	});
+	if(localInput &amp;&amp; localInput.action == 'order_guide') {
+		data.orderGuideModal = $sp.getWidget('widget-modal', {
+																											embeddedWidgetId: 'sc-checkout', 
+																											embeddedWidgetOptions: {
+                cart: {
+                    name: localInput.cart
+                },
+																																	action: localInput.action, 
+																																	item: localInput.itemDetails, 
+                requested_for: {
+                    id: options.requested_for_id,
+                    displayValue: options.requested_for_display
+                },
+																																	auto_redirect: options.auto_redirect,
+																																	parentParams: localInput.workspaceParams,
+																																	native_mobile: options.native_mobile,
+																																    isServiceWorkspace: options.isServiceWorkspace,
+																																	referrer: data.referrer
+																																}, 
+																											backdrop: 'static', 
+																											keyboard: false, 
+																											size: 'md'
+																								});
+		return;
+    } else if (localInput &amp;&amp; localInput.action === 'log_request_cart') {
+		 $sp.logStat('Add to Cart Request', localInput.itemDetails.sys_class_name, localInput.itemDetails.sys_id, localInput.itemDetails.name, $sp.getPortalRecord().getUniqueValue());
+		 return;
+    } else if (localInput &amp;&amp; localInput.action == "init_guide") {
+		guideJS = new sn_sc.OrderGuide('' + localInput.orderGuideData.sysparm_id);
+		var temp = guideJS.init(localInput.orderGuideData);
+		if (JSUtil.notNil(temp.errMsg)) {
+			gs.addErrorMessage(temp.errMsg);
+			data.error = true;
+			return;
+		}
+		for (var gf in localInput.orderGuideData._fields) {
+			var field = localInput.orderGuideData._fields[gf];
+			if (variableClassToCascade.indexOf(field._class_name) &gt; -1)
+				guideVariableClassMap[field._class_name] = field;
+			else
+				guideVariableNameMap[field.name] = field;
+		}
+		//data.guide_requested_for will be needed to populate requested for field on cart_items of the included items.
+        data.guide_requested_for = "";
+        if (guideVariableClassMap.RequestedForQuestion)
+		data.guide_requested_for = guideVariableClassMap.RequestedForQuestion.value;
+        else {
+            var defaultRequestedForValue = getDefaultRequestedForUser(localInput.orderGuideData, localInput.options);
+            if (defaultRequestedForValue)
+                guideVariableClassMap.RequestedForQuestion = {
+                    'value': defaultRequestedForValue,
+                    'displayValue': GlideUser.getUserByID(defaultRequestedForValue).getDisplayName()
+                };
+        }
+
+		data.showIncludeToggle = guideJS.isIncludeItems();
+		data.requested_for_variable_count = 0;
+        var item;
+        var itemGlobalData = {
+            items: [],
+            client_scripts: {},
+            ui_policies: {},
+            ui_scripts: null
+        };
+		for(var i = 0; i &lt; temp.items.length; i++) {
+			var includedItem = new sn_sc.CatItem(temp.items[i].sys_id);
+            if (!validateAccessForIncludedItem(includedItem, data.guide_requested_for))
+				continue;
+			var itemData = {
+				'sys_id': temp.items[i].sys_id, 
+				'table': 'sc_cat_item', 
+				'quantity': temp.items[i].quantity, 
+				'is_guide': true, 
+				'is_ordering': true,
+				'variables' : {}
+			};
+			if (localInput.orderGuideData.cascade) {
+				for (var gf in localInput.orderGuideData._fields) {
+					var field = localInput.orderGuideData._fields[gf];
+					itemData.variables[field.name] = field.value;	
+				}
+			}
+			if (guideVariableClassMap.RequestedForQuestion)
+				itemData.requested_for = guideVariableClassMap.RequestedForQuestion.value;
+				
+            item = $sp.getCatalogItem(itemData);
+			item.quantity = temp.items[i].quantity;
+			item.show_quantity = temp.items[i].show_quantity;
+			item.isOrderGuideItem = true;
+			item.included = true;
+			item.delayView = true;
+			item.sysparm_item_guid = gs.generateGUID();
+			item._attachmentGUID = item.sysparm_item_guid;
+			item.order = parseInt(temp.items[i].order);
+			item.native_mobile = options.native_mobile == 'true';
+			if (item.has_requested_for_variable)
+				data.requested_for_variable_count++;
+
+            transferDataIntoGloablObject(item, itemGlobalData);
+
+			var table_name = 'sc_cart_item';
+			var className = item.sys_class_name;
+			if (!new global.CatalogItemTypeProcessor().canCreateNormalCartItem(className)) {
+				if (className == 'sc_cat_item_producer') {
+					var gr = new GlideRecord('sc_cat_item_producer');
+					if (gr.get(item.sys_id))
+						table_name = gr.getValue('table_name');
+				}
+			}
+			item.targetTable = table_name;
+			for (var field in item._fields) {
+				var f = item._fields[field];
+                                if (f.sys_readonly)
+                                	continue;
+
+				if (guideVariableClassMap[f._class_name])
+			        	copyField(guideVariableClassMap[f._class_name], f);
+				else if(localInput.orderGuideData.cascade &amp;&amp; guideVariableNameMap[f.name]) {
+					copyField(guideVariableNameMap[f.name], f);
+					if (f.type == 'sc_attachment')
+						f.value = new VariableUtil().copyAttachment(guideVariableNameMap[f.name].value, 'ZZ_YY' + item.targetTable, item.sysparm_item_guid);
+				}
+                if (f._class_name === "RequestedForQuestion") {
+                    handleDelegationCheckOnField(includedItem, f);
+                    handleRequestedForReadOnlyOnField(data.guide_requested_for, f);
+                }
+			}
+			if (temp.variable_assignments[item.sys_id]) {
+				var cur = temp.variable_assignments[item.sys_id];
+				for (var fieldId in cur) {
+					var q = GlideappQuestion.getQuestion(fieldId);
+					item._fields[q.getName()].value = cur[fieldId];
+					if (q.getType() == 21 || q.getType() == 8) {
+						q.setValue(cur[fieldId]);
+						if (q.getType() == 21) {
+							var vals = '' + q.getDisplayValues();
+							vals = vals.slice(1, -1);
+							item._fields[q.getName()].display_value_list = vals.split(', ');
+						}
+					}
+					item._fields[q.getName()].displayValue = q.getDisplayValue();
+				}
+			}
+            itemGlobalData.items.push(item);
+		}
+        data.itemGlobalData = itemGlobalData;
+		if(temp.conflicting_cart_domain)
+            data.conflictingCartDomainMsg = gs.getMessage("Your cart has item(s) belonging to '{0}' domain. To continue to add this item, clear the cart or check out the existing item(s).", temp.conflicting_cart_domain);
+		return;
+    } else if (localInput &amp;&amp; localInput.action == "checkout_guide") {
+		guideJS = new sn_sc.OrderGuide('' + data.sys_id);
+		var cartJS = new sn_sc.CartJS('' + data.sys_id);
+        if (localInput.requested_for.id)
+            cartJS.setRequestedFor(localInput.requested_for.id);
+		for(var i = 0; i &lt; localInput.guideItems.length; i++) {
+			if(localInput.guide_requested_for)
+				localInput.guideItems[i].sysparm_guide_requested_for = localInput.guide_requested_for;
+			try {
+			guideJS.navigateFromMap(localInput.guideItems[i]);
+			} catch (e) {
+                //Should never Happen
+			}
+		}
+		cartJS.activateGuide();
+		cartJS.setParentParams(localInput.workspaceParams);
+		cartJS.setEngagementChannel(data.engagement_channel);
+		cartJS.setReferrer(data.referrer);
+		data.result = cartJS.checkoutGuide();
+		var portalId = $sp.getPortalRecord().getUniqueValue();
+		$sp.logStat('Order Now Request', localInput.sc_cat_item.sys_class_name, localInput.sc_cat_item.sys_id, localInput.sc_cat_item.name, portalId);
+		$sp.logStat('Cat Item Request', localInput.sc_cat_item.sys_class_name, localInput.sc_cat_item.sys_id, localInput.sc_cat_item.name, portalId);
+		return;
+    } else if (localInput &amp;&amp; localInput.action == "add_to_cart") {
+		var cart = new sn_sc.CartJS();
+		guideJS = new sn_sc.OrderGuide('' + localInput.sys_id);
+		for(var i = 0; i &lt; localInput.items.length; i++) {
+			if(localInput.guide_requested_for)
+				localInput.items[i].sysparm_guide_requested_for = localInput.guide_requested_for;
+			localInput.items[i].sysparm_cart_name = "";
+			try {
+			guideJS.navigateFromMap(localInput.items[i]);
+			} catch (e) {
+                //Should never happen
+			}
+		}
+		if (guideJS.isUseCustomCart())
+			new sn_sc.CartJS(localInput.sys_id).empty("");
+		cart.activateGuide();
+		return;
+    } else if (localInput &amp;&amp; localInput.action == "format_prices") {
+		data.frequencySequence = [];
+		var gr = new GlideRecord('sys_choice');
+		gr.addQuery('name', 'sys_frequency');
+		gr.addQuery('language', gs.getSession().getLanguage());
+		gr.orderBy('sequence');
+		gr.query();
+		while(gr.next())
+			data.frequencySequence.push(gr.label.getDisplayValue());
+		var spCurrencyFormatter = new SPCurrencyFormatter();
+		data.frequencyMap = {};
+		for(var key in localInput.prices)
+			data.frequencyMap[key] = spCurrencyFormatter.format(localInput.prices[key]);
+		return;
+	}
+	// portal can specify a catalog and category home page
+	data.sc_catalog_page = $sp.getDisplayValue("sc_catalog_page") || "sc_home";
+	data.sc_category_page = $sp.getDisplayValue("sc_category_page") || "sc_category";
+	var catalogID = $sp.getParameter("catalog_id") ? $sp.getParameter("catalog_id") + "" : "-1";
+	var m = data.msgs = {};
+	m.scHomeMsg = gs.getMessage("Service Catalog");
+	m.step1 = gs.getMessage("Describe Needs");
+	m.step2 = gs.getMessage("Choose Options");
+	m.step3 = gs.getMessage("Summary");
+	m.prevMsg = gs.getMessage("Previous");
+	m.nextMsg = gs.getMessage("Next");
+	m.submitMsg = gs.getMessage("Submit");
+	m.orderNowMsg = gs.getMessage("Order Now");
+	m.requestMsg = gs.getMessage("Request");
+	m.submittedMsg = gs.getMessage("Submitted");
+	m.createdMsg = gs.getMessage("Created");
+	m.clickMsg = gs.getMessage("click here to view");
+	m.dialogTitle = gs.getMessage("Delete Attachment");
+	m.dialogMessage = gs.getMessage("Are you sure?");
+	m.dialogOK = gs.getMessage("OK");
+	m.dialogCancel = gs.getMessage("Cancel");
+	m.requestSubmitted = gs.getMessage("Thank you, your request has been submitted.");
+	m.viewAttachedImage = gs.getMessage("View attached image");
+	m.downloadAttachment = gs.getMessage("Download attachment");
+	data.maxAttachmentSize = parseInt(gs.getProperty("com.glide.attachment.max_size", 1024));
+	if (isNaN(data.maxAttachmentSize))
+		data.maxAttachmentSize = 24;
+	m.largeAttachmentMsg = gs.getMessage("Attached files must be smaller than {0} - please try again", "" + data.maxAttachmentSize + "MB");
+	m.renameSuccessMsg = gs.getMessage("Attachment renamed successfully");
+	m.deleteSuccessMsg = gs.getMessage("Attachment deleted successfully");
+	m.invalidRecordMsg = gs.getMessage('You are either not authorized or record is not valid.');
+	m.delete_attachment = gs.getMessage("Delete Attachment?");
+    m.chooseOptionsOpenedMsg = gs.getMessage("Opened Choose options");
+	data.hideDeliveryTime = (options.hide_delivery_time == 'true');
+	data.recordFound = true;
+	if (options.sys_id)
+		data.sys_id = options.sys_id;
+	if (!data.sys_id) {
+		data.recordFound = false;
+		return;
+	}
+	var validatedItem = new sn_sc.CatItem('' + data.sys_id);
+  if (!validatedItem.canView() || !validatedItem.isVisibleServicePortal()) { 
+		data.recordFound = false;
+    return;
+	}	
+	if (options.native_mobile == 'true') {
+			if (gs.getProperty('glide.sc.mobile.item_class_not_supported', '').split(',').indexOf(validatedItem.getRecordClass()) &gt; -1) {
+				data.not_for_mobile = true;
+				return;
+			}
+			if (gs.getProperty('glide.sc.mobile.include_desktop_only_items', 'true') == 'false') {
+				if (validatedItem.getAvailability() == 'on_desktop') {
+					data.not_for_mobile = true;
+					return;
+				}
+			}
+		}
+	data.showPrices = $sp.showCatalogPrices();
+  data.sc_cat_item = $sp.getGuide(data.sys_id, true, false);
+	data.readonly_user = gs.hasRole('snc_read_only');
+	data.sc_cat_item.native_mobile = options.native_mobile == 'true';
+	data.sys_properties = {
+		twostep: gs.getProperty("glide.sc.sp.twostep", "true") == 'true',
+		mobileNativeColor: gs.getProperty("glide.sc.mobile.primary_color", "#1f8476"),
+		cartEnabled: gs.getProperty("glide.sc.cart.enabled", "false") == "true"
+	};
+	if (data.sc_cat_item.category) {
+		var categoryJS;
+		var categoryID = validatedItem.getFirstAccessibleCategoryForSearch((catalogID &amp;&amp; catalogID != "-1" ? catalogID : $sp.getCatalogs().value + ""));
+		if (GlideStringUtil.isEligibleSysID($sp.getParameter("sysparm_category"))) {
+			categoryJS = new sn_sc.CatCategory($sp.getParameter("sysparm_category") + "");
+			categoryID = $sp.getParameter("sysparm_category") + "";
+        } else if (categoryID)
+			categoryJS = new sn_sc.CatCategory(categoryID);
+		if (categoryJS &amp;&amp; GlideStringUtil.isEligibleSysID(categoryJS.getID())) {
+			data.category = {
+				name: categoryJS.getTitle(),
+				url: '?id=' + data.sc_category_page + '&amp;sys_id=' + categoryID
+			}
+			if (categoryJS.getCatalog()) {
+				catalogID = categoryJS.getCatalog();
+				data.catalog_id = catalogID;
+				var catalogObj = new sn_sc.Catalog(catalogID);
+				data.sc_catalog = catalogObj.getTitle();
+			}
+			data.categories = [];
+			data.categories.push({
+				label: categoryJS.getTitle(),
+				url: '?id=' + data.sc_category_page + '&amp;sys_id=' + categoryID
+			});
+			while(categoryJS &amp;&amp; categoryJS.getParent()) {
+				var parentId =  categoryJS.getParent();
+				categoryJS = new sn_sc.CatCategory(parentId);
+				var category = {
+					label: categoryJS.getTitle(),
+					url: '?id=' + data.sc_category_page + '&amp;sys_id=' + parentId
+				};
+				data.categories.unshift(category);
+			}
+			if ((($sp.getCatalogs().value + "").split(",")).length &gt; 1) {
+				data.all_catalog_msg = gs.getMessage("All Catalogs");
+			}
+		}
+	}
+    m.openedOrderGuideMsg = gs.getMessage("Order guide {0} opened", data.sc_cat_item.name);
+	$sp.logStat('Cat Item View', data.sc_cat_item.sys_class_name, data.sc_cat_item.sys_id, data.sc_cat_item.name, $sp.getPortalRecord().getUniqueValue());
+})();
+
+function copyField(srcField, dstField) {
+	dstField.value = srcField.value;
+	dstField.displayValue = srcField.displayValue;
+	dstField.display_value_list = srcField.display_value_list;
+}
+
+function transferDataIntoGloablObject(item, itemGlobalData) {
+    if (item.client_script) {
+        pullObjectsIntoGlobal(item.client_script.onLoad, itemGlobalData.client_scripts);
+        pullObjectsIntoGlobal(item.client_script.onChange, itemGlobalData.client_scripts);
+        pullObjectsIntoGlobal(item.client_script.onSubmit, itemGlobalData.client_scripts);
+        item.client_script.onLoad = getIdArrFromObjectArray(item.client_script.onLoad);
+        item.client_script.onChange = getIdArrFromObjectArray(item.client_script.onChange);
+        item.client_script.onSubmit = getIdArrFromObjectArray(item.client_script.onSubmit);
+    }
+    pullObjectsIntoGlobal(item.policy, itemGlobalData.ui_policies);
+    item.policy = getIdArrFromObjectArray(item.policy);
+    if (!itemGlobalData.ui_scripts)
+        itemGlobalData.ui_scripts = item.ui_scripts;
+
+    item.ui_scripts = [];
+}
+
+function pullObjectsIntoGlobal(objectArr, globalObject) {
+    for (var i in objectArr) {
+        var id = objectArr[i].sys_id;
+        if (!globalObject.hasOwnProperty(id))
+            globalObject[id] = objectArr[i];
+    }
+}
+
+function getIdArrFromObjectArray(objectArr) {
+    var idArr = [];
+    for (var i in objectArr)
+        idArr.push(objectArr[i].sys_id)
+    return idArr;
+}
+
+function getDefaultRequestedForUser(guideData, options) {
+    var requestedForID = "";
+    if (options.requested_for_id)
+        requestedForID = options.requested_for_id;
+    else if (guideData.sysparm_parent_table &amp;&amp; guideData.sysparm_parent_sys_id)
+		requestedForID = new global.GlobalServiceCatalogUtil().getRequestForSysID(guideData.sysparm_parent_table, guideData.sysparm_parent_sys_id);
+	
+    return requestedForID;
+}
+
+function handleRequestedForReadOnlyOnField(guideRequestedFor, field) {
+    if (guideRequestedFor)
+        field.sys_readonly = true;
+}
+
+function handleDelegationCheckOnField(item, field) {
+    if (item.isDelegationAllowed(field.value))
+        return;
+
+    var delegationErrorMessage = {
+        message : gs.getMessage("Item is unavailable for this user"),
+        type : "error"
+	};
+
+    field.isServerInvalid = true;
+    if (!field.messages)
+        field.messages = [];
+    
+    field.messages.push(delegationErrorMessage)
+}
+
+function validateAccessForIncludedItem(includedItem, guideRequestedFor) {
+	var isVisibleOnServicePortal = includedItem.isVisibleServicePortal();
+	var isAccessibleForRequester = includedItem.canView();
+	var isDelegationAllowed = true;
+    if (guideRequestedFor)
+        isDelegationAllowed = includedItem.isDelegationAllowed(guideRequestedFor);
+	
+	return isVisibleOnServicePortal &amp;&amp; isAccessibleForRequester &amp;&amp; isDelegationAllowed;
+}]]&gt;&lt;/script&gt;&lt;servicenow&gt;false&lt;/servicenow&gt;&lt;sys_class_name&gt;sp_widget&lt;/sys_class_name&gt;&lt;sys_created_by&gt;admin&lt;/sys_created_by&gt;&lt;sys_created_on&gt;2021-08-29 04:25:18&lt;/sys_created_on&gt;&lt;sys_id&gt;36f1598d07123010e7b1f7208c1ed0e4&lt;/sys_id&gt;&lt;sys_mod_count&gt;2&lt;/sys_mod_count&gt;&lt;sys_name&gt;Copy of SC Order Guide&lt;/sys_name&gt;&lt;sys_package display_value="Payment Requests" source="x_661994_paymt_req"&gt;000abe7907913010e7b1f7208c1ed0c2&lt;/sys_package&gt;&lt;sys_policy/&gt;&lt;sys_scope display_value="Payment Requests"&gt;000abe7907913010e7b1f7208c1ed0c2&lt;/sys_scope&gt;&lt;sys_update_name&gt;sp_widget_36f1598d07123010e7b1f7208c1ed0e4&lt;/sys_update_name&gt;&lt;sys_updated_by&gt;admin&lt;/sys_updated_by&gt;&lt;sys_updated_on&gt;2021-09-07 11:55:13&lt;/sys_updated_on&gt;&lt;template&gt;&lt;![CDATA[&lt;div class="" ng-if="::(data.recordFound &amp;&amp; !data.not_for_mobile)" sn-atf-blacklist="IS_SERVICE_CATALOG"&gt;
+ 	&lt;div ng-if="::data.sc_cat_item" class="row"&gt;
+		&lt;div class="col-sm-12"&gt;
+			&lt;div ng-class="['panel', 'panel-default', {'order-guide-mobile': {{::data.isMEE}}}]"&gt;
+				&lt;div ng-class="['timeline-container', {'b-b': {{::!data.isMEE}}}]"&gt;
+					&lt;div class="wrapper-md break-word" ng-if="::!data.isMEE"&gt;
+						&lt;h2 class="h2 m-n font-thin" ng-if="::data.sc_cat_item.name"&gt;{{::data.sc_cat_item.name}}&lt;/h2&gt;
+             &lt;div class="text-muted hidden-xs hidden-sm" ng-if="::data.sc_cat_item.short_description"&gt;{{::data.sc_cat_item.short_description}}&lt;/div&gt;
+					&lt;/div&gt;
+					&lt;div ng-class="['wrapper-xs og-timeline', {'b-t': {{::!data.isMEE}}}]"&gt;
+						&lt;div class="iconlink col-sm-4 text-a-l pull-left-xs padding-left-xs" ng-class = "{'hidden-xs hidden-sm' : guide_step != 0, 'hidden-lg hidden-md' : (options.compact_mode == 'true' || data.isMEE) &amp;&amp; guide_step != 0, 'col-sm-6' : options.compact_mode == 'true' &amp;&amp; guide_step == 0}" style="padding-left:61px"&gt;
+								&lt;div ng-if="::!data.isMEE" class="circle_icon" ng-class="guide_step == 0 ? 'step_active' : 'step_inactive'"&gt;
+                &lt;i class="fa fa-edit step-icon" style="left: -8px;"/&gt;
+              &lt;/div&gt;
+							&lt;span class="text-muted m-l-sm step-text"&gt;{{m.step1}}&lt;/span&gt;	
+						&lt;/div&gt;
+						&lt;div class="iconlink col-sm-4 pull-left-xs left-align-xs" ng-class = "{'hidden-xs hidden-sm' : guide_step != 1 , 'hidden-lg hidden-md' : (options.compact_mode == 'true' || data.isMEE) &amp;&amp; (guide_step != 1 || isItemOpened), 'col-sm-6' : options.compact_mode == 'true' &amp;&amp; guide_step == 1, 'text-a-c': {{ ::!data.isMEE}} }"&gt;
+              &lt;div ng-if="::!data.isMEE" class="circle_icon" ng-class="guide_step == 1 ? 'step_active' : 'step_inactive'"&gt;
+                &lt;i class="fa fa-list step-icon"/&gt;
+              &lt;/div&gt;
+							&lt;span class="text-muted m-l-sm step-text"&gt;{{m.step2}}&lt;/span&gt;
+						&lt;/div&gt;
+						&lt;div class="iconlink col-sm-4 text-a-r left-align-xs" ng-class = "{'pull-left-xs': {{::!data.isMEE}}, 'hidden-xs hidden-sm' : guide_step != 2 , 'hidden-lg hidden-md' : (options.compact_mode == 'true' || data.isMEE) &amp;&amp; guide_step != 2, 'col-sm-6' : options.compact_mode == 'true' &amp;&amp; guide_step == 2}" style="padding-right:61px"&gt;
+              &lt;div ng-if="::!data.isMEE" class="circle_icon" ng-class="guide_step == 2 ? 'step_active' : 'step_inactive'"&gt;
+                &lt;i class="fa fa-check step-icon" style="top: -10px;left: -9px;"/&gt;
+              &lt;/div&gt;
+              &lt;span ng-if="::!data.isMEE" class="text-muted m-l-sm step-text"&gt;{{m.step3}}&lt;/span&gt;
+              &lt;div ng-if="::data.isMEE" class="mobile-summary"&gt;
+                &lt;span class="text-muted m-l-sm step-text"&gt;{{m.step3}}&lt;/span&gt;
+                &lt;a ng-if="::data.isMEE" ng-disabled="submitted" name="prev" ng-click="goPrev()"&gt;${Edit Options}&lt;/a&gt;
+              &lt;/div&gt;
+						&lt;/div&gt;
+					&lt;/div&gt;
+				&lt;/div&gt;
+				]]&gt;&lt;/template&gt;&lt;/sp_widget&gt;&lt;/record_update&gt;</payload>
+        <payload_hash>914318710</payload_hash>
+        <record_name>Copy of SC Order Guide</record_name>
+        <reverted_from/>
+        <source>36dbfaf907913010e7b1f7208c1ed0d5</source>
+        <source_table>sys_update_set</source_table>
+        <state>previous</state>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-07 11:55:13</sys_created_on>
+        <sys_id>114f01c007223010e7b1f7208c1ed0aa</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_recorded_at>17bc01cbb5b0000001</sys_recorded_at>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-07 11:55:13</sys_updated_on>
+        <type>Widget</type>
+        <update_guid>994f01c0212230103bab8ebde31c47a9</update_guid>
+        <update_guid_history>994f01c0212230103bab8ebde31c47a9:914318710,6fee85c00122301072b749ec154c909f:971307323,b6f1598df71230106dd36533c996f3e6:1453911895</update_guid_history>
+    </sys_update_version>
+    <sys_metadata_delete action="INSERT_OR_UPDATE">
+        <sys_audit_delete display_value="Copy of SC Order Guide">1340dd0407223010e7b1f7208c1ed00f</sys_audit_delete>
+        <sys_class_name>sys_metadata_delete</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2021-09-07 11:59:43</sys_created_on>
+        <sys_db_object display_value="" name="sp_widget">sp_widget</sys_db_object>
+        <sys_id>0a4b1064b0334c50832bdffa06ae7900</sys_id>
+        <sys_metadata>36f1598d07123010e7b1f7208c1ed0e4</sys_metadata>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>Copy of SC Order Guide</sys_name>
+        <sys_package display_value="Payment Requests" source="x_661994_paymt_req">000abe7907913010e7b1f7208c1ed0c2</sys_package>
+        <sys_parent/>
+        <sys_policy/>
+        <sys_scope display_value="Payment Requests">000abe7907913010e7b1f7208c1ed0c2</sys_scope>
+        <sys_scope_delete display_value="">7f3b44d21a8a418488cc620bcfd142d9</sys_scope_delete>
+        <sys_update_name>sp_widget_36f1598d07123010e7b1f7208c1ed0e4</sys_update_name>
+        <sys_update_version display_value="sp_widget_36f1598d07123010e7b1f7208c1ed0e4">114f01c007223010e7b1f7208c1ed0aa</sys_update_version>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2021-09-07 11:59:43</sys_updated_on>
+    </sys_metadata_delete>
+</record_update>
